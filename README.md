@@ -1,6 +1,6 @@
 # Scala Best Practices
 
-<img src="https://github.com/bitlap/scala-best-practices/tree/master/assets/scala-logo-256.png"  align="right" width="100" height="100" />
+<img src="./assets/scala-logo-256.png"  align="right" width="100" height="100" />
 
 一系列最佳实践的集合，友好地对想要做出贡献的人。
  

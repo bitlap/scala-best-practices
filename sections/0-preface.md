@@ -1,6 +1,6 @@
 ## 0. Preface
 
-<img src="https://github.com/bitlap/scala-best-practices/tree/master/assets/scala-logo-256.png"  align="right" width="128" height="128" />
+<img src=".././assets/scala-logo-256.png"  align="right" width="128" height="128" />
 
 以下是我为同事们整理的最佳实践列表，这些建议源于处理他人代码时自然产生的痛苦经历：-）
 
