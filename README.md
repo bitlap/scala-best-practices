@@ -2,11 +2,9 @@
 
 <img src="./assets/scala-logo-256.png"  align="right" width="100" height="100" />
 
-一系列最佳实践的集合，友好地对想要做出贡献的人。
- 
-- 版本： `2.0` 
+- 版本： `1.3` 
 - 更新时间: `2023-10-20`
-- 维护者：[梦境迷离](https://github.com/bitlap/scala-best-practices)
+- 翻译&维护者：[梦境迷离](https://github.com/bitlap/scala-best-practices)
 
 ## Table of Contents
 
