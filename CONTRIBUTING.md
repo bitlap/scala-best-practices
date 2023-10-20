@@ -1,15 +1,11 @@
-# Contributing to this project
+# 为本项目做出贡献
 
-[Monifu's Scala Best Practices](https://github.com/monifu/scala-best-practices)
-welcomes contributions from anybody wishing to participate.  All
-contributions must be licensed with
-[CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+[Monifu的Scala最佳实践](https://github.com/bitlap/scala-best-practices)
 
-## General Workflow
+欢迎任何希望参与的人提供材料。所有贡献必须获得[CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)许可。
 
-1. Make sure you can license your work under the [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/),
-   mentioned above
+## 一般工作流程
 
-2. All changes to the repo have to be agreed upon, negotiated (best practices are subject to negotiation, right?) - so
-   please submit pull requests, open issues, discuss about wanted additions
+1. 请确保您能以 [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) 许可您的作品。
+2. 对软件仓库的所有更改都必须经过协商（最佳实践也需要协商，不是吗？ 请提交拉取请求、打开issue、讨论想要添加的内容
 

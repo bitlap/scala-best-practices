@@ -1,25 +1,15 @@
 ## 0. Preface
 
-<img src="https://raw.githubusercontent.com/monifu/scala-best-practices/master/assets/scala-logo-256.png"  align="right" width="128" height="128" />
+<img src="https://github.com/bitlap/scala-best-practices/tree/master/assets/scala-logo-256.png"  align="right" width="128" height="128" />
 
-What follows is a list of best practices I compiled for my colleagues,
-advice sprung from the painful experience coming naturally from
-dealing with other people's code :-)
+以下是我为同事们整理的最佳实践列表，这些建议源于处理他人代码时自然产生的痛苦经历：-）
 
-Defining a list of best practices is always hard. I like to think that
-we are defining a protocol of communication, because we are. Therefore
-this document uses keywords defined in
-[RFC 2119](https://www.ietf.org/rfc/rfc2119.txt), to differentiate
-between rules that should never be broken and those that can be broken
-if you know what you're doing.
+定义一份最佳实践清单总是很难。我喜欢认为我们是在定义一种通信协议，因为我们确实是在这样做。因此本文档使用了[RFC 2119](https://www.ietf.org/rfc/rfc2119.txt)中定义的关键字，以区分哪些规则是绝对不能违反的，哪些规则是知道自己在做什么就可以违反的。
 
-This list is also far from complete.
+这份名单还远远不够完整。
 
 ### 0.1. MUST NOT follow advice blindly
 
-This should be the first rule of any document that describes best
-practices.
+这应该是任何描述最佳实践的文件的第一条规则。 
 
-Always try to understand the reasons behind a rule, don't
-cargo-cult. Following advice blindly leads to the worst hairballs
-imaginable.
+应始终努力理解规则背后的原因，不要盲目听从建议。否则会导致最糟糕的结果。
