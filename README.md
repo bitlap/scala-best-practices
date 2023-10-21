@@ -6,7 +6,7 @@
 - 更新时间: `2023-10-20`
 - 翻译&维护者：[梦境迷离](https://github.com/bitlap/scala-best-practices)
 
-## Table of Contents
+## 目录
 
 - [0. 序言](sections/0-preface.md)
   - [0.1 切勿盲从建议](sections/0-preface.md#01-must-not-follow-advice-blindly)
