@@ -4,11 +4,11 @@
 
 ### 2.1. MUST NOT use "return"
 
-> 不要使用`return`
+> 不要使用 `return`
 
-Java 的`return`语句会产生副作用，即释放堆栈并将此值交给调用者。在一种强调全副作用的编程语言中，这样做是合理的。然而，Scala 是一种面向表达式的语言，其重点在于控制/限制副作用，因此`return`语句并不习惯。
+Java 的 `return` 语句会产生副作用，即释放堆栈并将此值交给调用者。在一种强调全副作用的编程语言中，这样做是合理的。然而，Scala 是一种面向表达式的语言，其重点在于控制/限制副作用，因此 `return` 语句并不习惯。
 
-更糟糕的是，`return`的行为可能并不像你想象的那样。例如，在 Play 控制器中，尝试执行以下操作：
+更糟糕的是，`return` 的行为可能并不像你想象的那样。例如，在 Play 控制器中，尝试执行以下操作：
 ```scala
 def action = Action { request =>
   if (someInvalidationOf(request))
@@ -18,9 +18,9 @@ def action = Action { request =>
 }
 ```
 
-在 Scala 中，嵌套匿名函数内的`return`语句是通过抛出和捕获`NonLocalReturnException`来实现的。[Scala 语言规范](https://scala-lang.org/files/archive/spec/2.13/spec.pdf) 第 6.20 节是这么说的。
+在 Scala 中，嵌套匿名函数内的 `return` 语句是通过抛出和捕获 `NonLocalReturnException` 来实现的。[Scala 语言规范](https://scala-lang.org/files/archive/spec/2.13/spec.pdf) 第 6.20 节是这么说的。
 
-此外，`return` 是反结构编程，因为函数可以有多个退出点，如果你需要`return`，比如在那些有大量`if/else`分支的巨大方法中，`return`的存在是一个明确的信号，表明代码很糟糕，未来很容易引起BUG，因此急需重构。
+此外，`return` 是反结构编程，因为函数可以有多个退出点，如果你需要 `return`，比如在那些有大量 `if/else` 分支的巨大方法中，`return` 的存在是一个明确的信号，表明代码很糟糕，未来很容易引起BUG，因此急需重构。
 
 ### 2.2. SHOULD use immutable data-structures
 
@@ -50,7 +50,7 @@ someProducer.fetchList
 
 ### 2.3. SHOULD NOT update a `var` using loops or conditions
 
-> 不应该使用循环和条件更新`var`
+> 不应该使用循环和条件更新 `var`
 
 这是大多数 Java 开发人员在使用 Scala 时都会犯的错误。例子：
 ```scala
@@ -97,7 +97,7 @@ def computeResult(x) = {
 }
 ```
 
-而你知道，只要分支变得过于复杂，就像关于`return`的讨论中所说的那样，这就表明代码有*异味*，需要重构，这是一件好事。
+而你知道，只要分支变得过于复杂，就像关于 `return` 的讨论中所说的那样，这就表明代码有*异味*，需要重构，这是一件好事。
 
 ### 2.4. SHOULD NOT define useless traits
 
@@ -116,11 +116,11 @@ case class Person(name: String, age: Int)
   extends PersonLike
 ```
 
-阅读这段代码的读者可能会得出这样的结论：在某些情况下，覆盖 `PersonLike` 是可取的。这与事实相去甚远 —— `Person`在其样例类中被完美地描述为一种无行为的数据结构。换句话说，它描述了数据的形状，如果你因为某种未知的原因需要覆盖这种形状，那么这个特质的定义就很糟糕，因为它强加了数据的形状，而这是你唯一可以覆盖的东西。如果你需要多态性，需求发生变化之后，你可以随时提出特质。
+阅读这段代码的读者可能会得出这样的结论：在某些情况下，覆盖 `PersonLike` 是可取的。这与事实相去甚远 —— `Person` 在其样例类中被完美地描述为一种无行为的数据结构。换句话说，它描述了数据的形状，如果你因为某种未知的原因需要覆盖这种形状，那么这个特质的定义就很糟糕，因为它强加了数据的形状，而这是你唯一可以覆盖的东西。如果你需要多态性，需求发生变化之后，你可以随时提出特质。
 
 如果你认为你可能需要覆盖这个源（比如在第一次访问时从数据库中获取人名），请不要这么做！
 
-请注意，我不是在谈论代数数据结构（即表示封闭选择集的密封特质 —— 例如`Option`）。
+请注意，我不是在谈论代数数据结构（即表示封闭选择集的密封特质 —— 例如 `Option`）。
 
 即使在你认为问题已经很清楚的情况下，也未必如此。让我们举个例子：
 ```scala
@@ -131,7 +131,7 @@ trait DBService {
 }
 ```
 
-这段代码来自真实场景 —— 我们有一个`DBService`，它可以处理查询或数据库中的持久化。这两种方法实际上是不相关的，所以如果你只需要获取资产，为什么要依赖那些需要数据库交互的组件中你不需要的东西呢？
+这段代码来自真实场景 —— 我们有一个 `DBService`，它可以处理查询或数据库中的持久化。这两种方法实际上是不相关的，所以如果你只需要获取资产，为什么要依赖那些需要数据库交互的组件中你不需要的东西呢？
 
 最近，我的代码看起来像这样：
 
@@ -153,9 +153,9 @@ object AssetsObservable {
 
 ### 2.5. MUST NOT use "var" inside a case class
 
-> 不要在样例类中使用`var`
+> 不要在样例类中使用 `var`
 
-样例类是定义类的语法糖，其中所有构造函数参数都是公共的和不可变的，因此是值标识的一部分，具有结构相等性、相应的`hashCode`实现以及编译器提供的自动生成的`apply/unapply`函数。
+样例类是定义类的语法糖，其中所有构造函数参数都是公共的和不可变的，因此是值标识的一部分，具有结构相等性、相应的 `hashCode` 实现以及编译器提供的自动生成的 `apply/unapply` 函数。
 
 通过这样做：
 
@@ -163,7 +163,7 @@ object AssetsObservable {
 case class Sample(str: String, var number: Int)
 ```
 
-你刚刚破坏了它的相等性和`hashCode`操作。现在尝试将其用作map中的键。
+你刚刚破坏了它的相等性和 `hashCode` 操作。现在尝试将其用作map中的键。
 
 一般来说，结构相等只适用于不可变的事物，因为相等操作必须是稳定的（不会随对象的历史而改变）。样例类适用于严格不可变的事物。如果需要更改对象，就不要使用样例类。
 
@@ -190,7 +190,7 @@ trait Foo {
 class Bar(val value: String) extends Foo
 ```
 
-原因与强制的限制有关 —— `var`只能被`var`覆盖，允许在继承上自由选择的方法是对抽象成员使用`def`定义。为什么要对那些从接口继承的变量施加限制呢？`def`是通用的，因此请使用它。
+原因与强制的限制有关 —— `var` 只能被 `var` 覆盖，允许在继承上自由选择的方法是对抽象成员使用 `def` 定义。为什么要对那些从接口继承的变量施加限制呢？`def` 是通用的，因此请使用它。
 
 ### 2.7. MUST NOT throw exceptions for validations of user input or flow control
 
@@ -206,7 +206,7 @@ class Bar(val value: String) extends Foo
 
 ### 2.8. MUST NOT catch Throwable when catching Exceptions
 
-> 捕获`Exception`时，不要捕获`Throwable`
+> 捕获 `Exception` 时，不要捕获 `Throwable`
 
 永远、永远、永远不要这样做：
 
@@ -219,7 +219,7 @@ try {
 }
 ```
 
-永远不要捕获`Throwable`，因为我们谈论的可能是永远不应该被捕获的极其致命的异常，这可能会导致进程崩溃。 例如，如果 JVM 抛出内存不足的错误，即使在`catch`子句中重新抛出异常，也可能为时已晚。考虑到进程内存不足，垃圾收集器可能会接管并冻结一切，使进程以不可恢复的僵尸状态结束。这意味着外部监督程序(如 Upstart）将没有机会重启它。
+永远不要捕获 `Throwable`，因为我们谈论的可能是永远不应该被捕获的极其致命的异常，这可能会导致进程崩溃。 例如，如果 JVM 抛出内存不足的错误，即使在 `catch` 子句中重新抛出异常，也可能为时已晚。考虑到进程内存不足，垃圾收集器可能会接管并冻结一切，使进程以不可恢复的僵尸状态结束。这意味着外部监督程序(如 Upstart）将没有机会重启它。
 
 请这样做：
 
@@ -236,13 +236,9 @@ try {
 
 ### 2.9. MUST NOT use "null"
 
-> 不要使用`null`
+> 不要使用 `null`
 
-You must avoid using `null`. Prefer Scala's `Option[T]` instead. Null
-values are error prone, because the compiler cannot protect
-you. Nullable values that happen in function definitions are not
-documented in those definitions. So avoid doing this:
-
+必须避免使用 `null`。请使用 Scala 的 `Option[T]`。空值很容易出错，因为编译器无法保护你。函数定义中出现的可空值不会在这些定义中记录。因此要避免这样做：
 ```scala
 def hello(name: String) =
   if (name != null)
@@ -251,7 +247,7 @@ def hello(name: String) =
     println("Hello, anonymous")
 ```
 
-As a first step, you could be doing this:
+第一步，你可以这样做：
 
 ```scala
 def hello(name: Option[String]) = {
@@ -260,27 +256,21 @@ def hello(name: Option[String]) = {
 }
 ```
 
-The point of using `Option[T]` is that the compiler forces you to deal
-with it, one way or another:
+使用 `Option[T]` 的意义在于，编译器会强迫你以某种方式处理它：
+1. 你要么必须立即处理它（例如，通过提供默认值、抛出异常等。。。）
+2. 或者你可以将 `Option` 结果向调用栈传播
 
-1. you either have to deal with it right away (e.g. by providing a
-   default, throwing an exception, etc..)
-2. or you can propagate the resulting `Option` up the call stack
-
-Also remember that `Option` is just like a collection of 0 or 1
-elements, so you can use foreach, which is totally idiomatic:
-
+还要记住，`Option` 就像一个拥有0或1个元素的集合，所以你可以使用 `foreach`，这完全是惯用的：
 ```scala
 val name: Option[String] = ???
 
 for (n <- name) {
-  // executes only when the name is defined
+  // 仅在name不为None的情况下执行
   println(n)
 }
 ```
 
-Combining multiple options is also easy:
-
+将多个 `Option` 组合起来也很容易：
 ```scala
 val name: Option[String] = ???
 val age: Option[Int] = ???
@@ -289,9 +279,7 @@ for (n <- name; a <- age)
   println(s"Name: $n, age: $a")
 ```
 
-And since `Option` is seen as an `Iterable` too, you can use `flatMap`
-on collections to get rid of `None` values:
-
+由于 `Option` 也被视为 `Iterable`，因此你可以在集合上使用 `flatMap` 来摆脱 `None` 值：
 ```scala
 val list = Seq(1,2,3,4,5,6)
 
@@ -301,9 +289,9 @@ list.flatMap(x => Some(x).filter(_ % 2 == 0))
 
 ### 2.10. MUST NOT use `Option.get`
 
-> 不要使用`Option.get`
+> 不要使用 `Option.get`
 
-You might be tempted to do this:
+你可能会想这样做：
 
 ```scala
 val someValue: Option[Double] = ???
@@ -312,46 +300,37 @@ val someValue: Option[Double] = ???
 val result = someValue.get + 1
 ```
 
-Don't ever do that, since you're trading a `NullPointerException` for a
-`NoSuchElementException` and that defeats the purpose of using
-`Option` in the first place.
+永远不要这样做，因为你正在用 `NullPointerException` 转换为 `NoSuchElementException`，这违背了使用 `Option` 的初衷。
 
-Alternatives:
+备择方案：
 
-1. using `Option.getOrElse`
-2. using `Option.fold`
-3. using pattern matching and dealing with the `None` branch explicitly
-4. not taking the value out of its optional context
+1. 使用 `Option.getOrElse`
+2. 使用 `Option.fold`
+3. 使用模式匹配并明确处理 `None` 分支
+4. 不从可选上下文中提取值
 
-As an example for (4), not taking the value out of its context means
-this:
-
+以（4）为例，不从可选上下文中提取值的意思是这样：
 ```scala
 val result = someValue.map(_ + 1)
 ```
 
 ### 2.11. MUST NOT use Java's Date or Calendar, instead use `java.time` (JSR-310)
 
-> 不要使用 Java 的日期或日历，而是使用`java.time` (JSR-310)
+> 不要使用 Java 的日期或日历，而是使用 `java.time` (JSR-310)
 
-Java's Date and Calendar classes from the standard library are awful
-because:
+Java 标准库中的日期和日历类非常糟糕，因为：
+1. 结果对象是可变的，这对于表达日期没有意义，日期应该是一个值（如果你必须在有字符串的地方使用 `StringBuffer`，你会有什么感觉？）
+2. 月份编号从零开始
+3. 特别是日期不保留时区信息，因此日期值完全无用
+4. GMT 和 UTC 之间没有区别
+5. 年份表示为 2 位数字而不是 4 位
 
-1. resulting objects are mutable, which doesn't make sense for
-   expressing a date, which should be a value (how would you feel if
-   you had to work with StringBuffer everywhere you have Strings?)
-2. months numbering is zero based
-3. Date in particular does not keep timezone info, so Date values are completely useless
-4. it doesn't make a difference between GMT and UTC
-5. years are expressed as 2 digits instead of 4
+相反，请始终使用 Java 8 中引入的 [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) API - 或者如果你陷入 Java 8 之前的领域，请使用 [`Joda-Time`](http://www.joda.org/joda-time/)，它是 `java.time` 的精神祖先。。
 
-Instead, always use the [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) API
-introduced in Java 8 - or if you're stuck in pre-Java 8 land, use [Joda-Time](http://www.joda.org/joda-time/), which is
-its spiritual ancestor.
 
 ### 2.12. SHOULD NOT use Any or AnyRef or isInstanceOf / asInstanceOf
 
-> 不应该使用`Any`或`AnyRef`或`isInstanceOf/asInstanceOf`
+> 不应该使用 `Any` 或 `AnyRef` 或 `isInstanceOf/asInstanceOf`
 
 Avoid using Any or AnyRef or explicit casting, unless you've got a
 really good reason for it. Scala is a language that derives value from
