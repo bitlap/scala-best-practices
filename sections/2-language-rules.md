@@ -202,13 +202,13 @@ class Bar(val value: String) extends Foo
 
 异常只对一件事有用 —— 向堆栈传递意外错误（bug）的信号，这样监督者就能捕捉到这些错误，并决定采取一些措施，如记录错误、发送通知、重启有问题的组件等。
 
-作为对权威的呼吁，参考 [Functional Programming with Scala](http://www.manning.com/bjarnason/) 第 4 章是合理的。
+作为对权威的呼吁，请参考 [Functional Programming with Scala](http://www.manning.com/bjarnason/) 第 4 章。
 
 ### 2.8. MUST NOT catch Throwable when catching Exceptions
 
 > 捕获`Exception`时，不要捕获`Throwable`
 
-Never, never, never do this:
+永远、永远、永远不要这样做：
 
 ```scala
 try {
@@ -219,16 +219,9 @@ try {
 }
 ```
 
-Never catch `Throwable` because we could be talking about extremely
-fatal exceptions that should never be caught and that should crash the
-process. For example if the JVM throws an out of memory error, even if
-you re-throw that exception in that catch clause, it may be too late -
-given that the process is out of memory, the garbage collector
-probably took over and froze everything, with the process ending in a
-zombie unrecoverable state. Which means that an external supervisor
-(like Upstart) will not get an opportunity to restart it.
+永远不要捕获`Throwable`，因为我们谈论的可能是永远不应该被捕获的极其致命的异常，这可能会导致进程崩溃。 例如，如果 JVM 抛出内存不足的错误，即使在`catch`子句中重新抛出异常，也可能为时已晚。考虑到进程内存不足，垃圾收集器可能会接管并冻结一切，使进程以不可恢复的僵尸状态结束。这意味着外部监督程序(如 Upstart）将没有机会重启它。
 
-Instead do this:
+请这样做：
 
 ```scala
 import scala.util.control.NonFatal
