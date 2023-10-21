@@ -2,82 +2,47 @@
 
 <img src=".././assets/scala-logo-256.png"  align="right" width="128" height="128" />
 
-These are general purpose hygienic rules that transcend the language
-or platform rules. Programming language is a form of communication,
-targeting computer systems, but also your colleagues and your future
-self, so respecting these rules is just like washing your hands after
-going to the bathroom.
+这些是超越语言或平台规则的通用卫生规则。编程语言是一种交流形式，针对的是计算机系统，也包括你的同事和未来的自己，所以尊重这些规则就像上完厕所后洗手一样。
 
 ### 1.1. SHOULD enforce a reasonable line length
 
-There's a whole science on typography which says that people lose
-their focus when the line of text is too wide, a long line makes it
-difficult to gauge where the line starts or ends and it makes it
-difficult to continue on the next line below it, as your eyes have to
-move a lot from the right to the left. It also makes it difficult to
-scan for important details.
+关于排版有一门完整的科学表明，当文本行太宽时，人们会失去注意力，一行长的文字会让人很难判断该行的开始或结束位置，并且很难继续下一行，因为你的眼睛必须从右到左移动很多。这也使得扫描重要细节变得困难。
 
-In typography, the optimal line length is considered to be somewhere
-between 50 and 70 chars.
+在排版中，最佳行长被认为是 50 到 70 个字符之间。
 
-In programming, we've got indentation, so it's not feasible to impose
-a 60 chars length for lines. 80 chars is usually acceptable, but not
-in Scala, because in Scala we use a lot of closures and if you want
-long and descriptive names for functions and classes, well, 80 chars
-is way too short.
+在编程中，我们有缩进，所以规定行的长度为 60 字符是不可行的。80 字符通常是可以接受的，但在 Scala 中却不行，因为在 Scala 中我们使用了大量的闭包，如果你希望函数和类的名称又长又有描述性，那么 80 字符就太短了。
 
-120 chars, as IntelliJ IDEA is configured by default, may be too wide
-on the other hand.  Yes, I know that we've got 16:9 wide monitors, but
-this doesn't help readability and with shorter lines we can put these
-wide monitors to good use when doing side-by-side diffs. And with long
-lines it takes effort to notice important details that happen at the
-end of those lines.
+另一方面，IntelliJ IDEA 的默认设置为 120 个字符，这可能太宽了。是的，我知道我们使用的是 16:9 宽屏显示器，但这对可读性没有任何帮助，而如果行数较短，我们就可以在进行并排对比差异时充分利用这些宽屏显示器。如果行数较长，我们就需要花费精力去注意行尾的重要细节。
 
-So as a balance:
+因此，作为一种平衡：
+- 争取以 80 个字符作为软限制，如果变得难看
+- 那么 100 字符就足够了，除了。。。
+- 函数签名，如果有限制，可能会非常难看
 
-- strive for 80 chars as the soft limit and if it gets ugly,
-- then 100 chars is enough, except for ...
-- function signatures, which can get really ugly if limited
+另一方面，任何超过 120 个字符的内容都是令人憎恶的。
 
-On the other hand, anything that goes beyond 120 chars is an abomination.
 
 ### 1.2. MUST NOT rely on a SBT or IDE plugin to do the formatting for you
 
-IDEs and SBT plugins can be of great help, however if you're thinking
-about using one to automatically format your code, beware.
+集成开发环境和 SBT 插件可以提供很大的帮助，但如果您想使用它们来自动格式化您的代码，那就要小心了。
 
-You won’t find a plugin that is able to infer the developer’s intent,
-since that requires a human-like understanding of the code and would be 
-near impossible to make. The purpose of proper indentation and formatting 
-isn't to follow some rigid rules set upon you in a cargo-cult way, but to
-make the code more logical, more readable, more
-approachable. Indentation is actually an art form, which is not awful
-since all you need is a nose for awful code and the urge of fixing
-it. And it is in the developer's job description to make sure that his
-code doesn't stink.
+你不会找到一个能够推断开发者意图的插件，因为这需要人类对代码的理解，几乎不可能做到。适当缩进和格式化的目的并不是为了遵循某些以事物崇拜的方式给你设定的僵硬规则，而是为了让代码更合理、更易读、更平易近人。缩进实际上是一门艺术，这并不可怕，因为你只需要对糟糕的代码有敏锐的嗅觉和修复的冲动。而开发人员的职责就是确保自己的代码不发臭。
 
-So automated means are fine, BUT BE CAREFUL to not ruin other people's
-carefully formatted code, otherwise I'll slap you in prose.
+因此，自动方法是可以的，但要注意不要破坏别人精心格式化的代码，否则我要用散文给你一记耳光。
 
-Lets think about what I said - if the line is too long, how is a
-plugin supposed to break it? Lets talk about this line (real code):
-
+让我们想一想我说过的话 —— 如果代码行太长，插件应该如何破解？让我们来谈谈这一行（真实代码）：
 ```scala
     val dp = new DispatchPlan(new Set(filteredAssets), start = startDate, end = endDate, product, scheduleMap, availabilityMap, Set(activationIntervals.get), contractRepository, priceRepository)
 ```
 
-In most cases, a plugin will just do truncation and I've seen a lot of these in practice:
-
+在大多数情况下，插件只会进行截断，我在实践中见过很多这样的情况：
 ```scala
     val dp = new DispatchPlan(Set(filteredAssets), start =
       startDate, end = endDate, product, scheduleMap, availabilityMap,
       Set(activationIntervals), contractRepository, priceRepository)
 ```
 
-Now that's not readable, is it? I mean, seriously, that looks like
-barf. And that's exactly the kind of output I see coming from people
-relying on plugins to work. We could also have this version:
-
+这可看不懂，对吧？我的意思是，说真的，这看起来就像呕吐物。这正是我所看到的依赖插件工作的人们所产生的结果。我们也可以有这样的版本：
 ```scala
     val dp = new DispatchPlan(
       Set(filteredAssets),
@@ -92,15 +57,12 @@ relying on plugins to work. We could also have this version:
     )
 ```
 
-Looks much better. But truth is, this isn't so good in other
-instances. Like say we've got a line that we want to break:
-
+看起来好多了。但事实上，在其他情况下这样做并不好。比方说，我们有一行想要断开：
 ```scala
    val result = service.something(param1, param2, param3, param4).map(transform)
 ```
 
-Now placing those parameters on their own line is awful, no matter how you deal with it:
-
+现在，无论你如何处理，将这些参数放在自己的行上都是非常糟糕的：
 ```scala
     // awful because that transform call is not visible
     val result = service.something(
@@ -118,7 +80,7 @@ Now placing those parameters on their own line is awful, no matter how you deal 
     ).map(transform)
 ```
 
-This would be much better:
+这样会好得多：
 
 ```scala
     val result = service
@@ -126,10 +88,7 @@ This would be much better:
       .map(transform)
 ```
 
-Now that's better, isn't it? Of course, sometimes that call is so long
-that this doesn't cut it. So you need to resort to a temporary value
-of some sort, e.g...
-
+现在好多了，不是吗？当然，有时调用的时间太长，这样做并不合适。因此，您需要使用某种临时值，例如。。。
 ```scala
     val result = {
       val instance =
@@ -148,92 +107,57 @@ of some sort, e.g...
     }
 ```
 
-Of course, sometimes if the code stinks so badly, you need to get into
-refactoring - as in, maybe too many parameters are too much for a
-function ;-)
+当然，有时如果代码非常糟糕，就需要进行重构 —— 比如，对于一个函数来说，也许参数太多了;-)
 
-And we are talking strictly about line lengths - once we get into
-other issues, things get even more complicated. So really, you won't
-find a plugin that does this analysis and that can make the right
-decision for you.
+而且，我们谈论的仅仅是行的长度，一旦涉及到其他问题，情况就会变得更加复杂。所以，你真的找不到一个插件能做这样的分析，并能为你做出正确的决定。
 
 ### 1.3. SHOULD break long functions
 
-Ideally functions should only be a couple of lines long. If the lines
-get too big, then we need to break them into smaller functions and
-give them a name.
+理想情况下，函数应该只有几行。如果行数太多，我们就需要将其拆分成更小的函数，并为它们命名。
 
-Note that in Scala we don't necessarily have to make such intermediate
-functions available in other scopes, the purpose here is to primarily
-aid readability, so in Scala we can do inner-functions to break logic
-into pieces.
+请注意，在 Scala 中，我们不一定必须在其他作用域中提供此类中间函数，这里的目的主要是为了提高可读性，因此在 Scala 中，我们可以使用内部函数将逻辑分解为多个部分。
 
 ### 1.4. MUST NOT introduce spelling errors in names and comments
 
-Spelling errors are freakishly annoying, interrupting a reader's flow.
-Use a spell-checker. Intelligent IDEs have built-in
-spell-checkers. Note the underlined spelling warnings and fix them.
+拼写错误非常烦人，会打断读者的阅读进度。使用拼写检查器。智能 IDE 具有内置的拼写检查器。请注意带下划线的拼写警告并修复它们。
 
 ### 1.5. Names MUST be meaningful
 
-*"There are only two hard things in Computer Science: cache
-invalidation and naming things."* -- Phil Karlton
+*"计算机科学中只有两件事很难：缓存失效和命名。"* —— Phil Karlton
 
-We've got three guidelines here:
+我们在这里有三条准则：
+1. 给出描述性的名称，但不要过多，四个字已经太多了
+2. 如果从上下文中可以很容易地推断出类型和用途，或者已经有了约定俗成的惯例，么在命名时可以简明扼要
+3. 如果采用描述性命名，不要说毫无意义的废话
 
-1. give descriptive names, but don't go overboard, four words is a
-   little too much already
-2. you can be terse in naming if the type / purpose can be easily
-   inferred from the immediate context, or if there's already an
-   established convention
-3. if going the descriptive route, don't do bullshit words that are
-   meaningless
-
-For example this is acceptable:
+举例来说，这样做是可以接受的：
 
 ```scala
 for (p <- people) yield
   transformed(p)
 ```
 
-We can see that `p` is a person from the immediate context, so a short
-one letter name is OK. This is also acceptable because `i` is an
-established convention to use as an index:
+我们可以从直接上下文中看出 `p` 是一个人，所以一个简短的单字母命名就可以了。这也是可以接受的，因为 `i` 是用作索引的既定约定：
 
 ```scala
 for (i <- 0 until limit) yield ???
 ```
 
-This is in general not acceptable, because usually with tuples the
-naming of the collection doesn't reflect well what's contained (if you
-haven't given those elements a name, then as a consequence the
-collection itself is going to have a bad name):
-
+这通常是不可接受的，因为通常对于元组，集合的命名并不能很好地反映所包含的内容（如果你没有给这些元素一个名称，那么集合本身就会有一个糟糕的名称）：
 ```
 someCollection.map(_._2)
 ```
 
-Implicit parameters on the other hand are OK with short names, because
-being passed implicitly, we don't care about them unless they are
-missing:
-
+另一方面，隐式参数可以使用简短的名称，因为它们是隐式传递的，我们不会在意它们，除非它们丢失了：
 ```scala
 def query(id: Long)(implicit ec: ExecutionContext, c: WSClient): Future[Response]
 ```
 
-This is not acceptable because the name is utterly meaningless, even
-if there's a clear attempt at being descriptive:
-
+这是不可取的，因为这个名称完全没有意义，即使有明显的描述意图：
 ```scala
 def processItems(people: Seq[Person]) = ???
 ```
 
-It's not acceptable because the naming of this function indicates a
-side-effect (`process` is a verb indicating a command), yet it doesn't
-describe what we are doing with those `people`. The `Items` suffix is
-meaningless, because we might have said `processThingy`,
-`processRows`, `processStuff` and it would still say exactly the same
-thing - absolutely nothing. It also increases visual clutter, as more
-words is more text to read and meaningless words are just noise.
+这是不可取的，因为这个函数的命名表示了一个副作用（`process` 是一个动词，表示命令），但它并没有描述我们要对这些人做什么。`Items` 后缀毫无意义，因为我们可以使用 `processThingy`、`processRows`、`processStuff`，但表达的意思仍然是一样的 —— 什么都没有。它还会增加视觉上的混乱，因为字数越多，要阅读的文字就越多，而无意义的字只是噪音。
 
-Properly chosen descriptive names - good. Bullshit names - bad.
+正确选择描述性名称 —— 好。废话连篇的名称 —— 不好。
