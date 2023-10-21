@@ -321,9 +321,9 @@ val result = someValue.map(_ + 1)
 Java 标准库中的日期和日历类非常糟糕，因为：
 1. 结果对象是可变的，这对于表达日期没有意义，日期应该是一个值（如果你必须在有字符串的地方使用 `StringBuffer`，你会有什么感觉？）
 2. 月份编号从零开始
-3. 特别是日期不保留时区信息，因此日期值完全无用
+3. 尤其是日期是不保留时区信息的，因此日期值完全无用
 4. GMT 和 UTC 之间没有区别
-5. 年份表示为 2 位数字而不是 4 位
+5. 年份用 2 位数表示，而不是 4 位数
 
 相反，请始终使用 Java 8 中引入的 [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) API - 或者如果你陷入 Java 8 之前的领域，请使用 [`Joda-Time`](http://www.joda.org/joda-time/)，它是 `java.time` 的精神祖先。。
 
