@@ -407,7 +407,7 @@ json match {
 
 ### 2.13. MUST serialize dates as either Unix timestamp, or as ISO 8601
 
-> 不要将日期序列化为 Unix 时间戳或 ISO 8601
+> 必须将日期序列化为 Unix 时间戳或 ISO 8601
 
 Unix timestamps, provided that we are talking about the number of
 seconds or milliseconds since 1970-01-01 00:00:00 UTC (with emphasis
