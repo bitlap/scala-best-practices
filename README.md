@@ -1,4 +1,4 @@
-# Scala Best Practices
+# Scala 最佳实践
 
 <img src="./assets/scala-logo-256.png"  align="right" width="100" height="100" />
 
