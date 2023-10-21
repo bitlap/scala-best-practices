@@ -25,7 +25,7 @@
   - [1.2. 👎 禁止依靠 SBT 或 IDE 插件进行代码格式化](sections/1-hygienic-rules.md#12-must-not-rely-on-a-sbt-or-ide-plugin-to-do-the-formatting-for-you)
   - [1.3. ✅ 应该避免长函数](sections/1-hygienic-rules.md#13-should-break-long-functions)
   - [1.4. 👎 在命名和注释中引入拼写错误](sections/1-hygienic-rules.md#14-must-not-introduce-spelling-errors-in-names-and-comments)
-  - [1.5. 👍🏻 命名必须有意义](sections/1-hygienic-rules.md#15-names-must-be-meaningful)
+  - [1.5. 👍 命名必须有意义](sections/1-hygienic-rules.md#15-names-must-be-meaningful)
 
 - [2. 语言规范](sections/2-language-rules.md)
   - [2.1. 👎 禁止使用`return`](sections/2-language-rules.md#21-must-not-use-return)
@@ -62,12 +62,12 @@
   - [4.1. ✅ 应该视并发如瘟疫](sections/4-concurrency-parallelism.md#41-should-avoid-concurrency-like-the-plague-it-is)
   - [4.2. ✅ 应该只在适当的情况下使用适当的抽象](sections/4-concurrency-parallelism.md#42-should-use-appropriate-abstractions-only-where-suitable---future-actors-rx)
   - [4.3. ❎ 不应该在`Futures`中封装纯 CPU 绑定的操作](sections/4-concurrency-parallelism.md#43-should-not-wrap-purely-cpu-bound-operations-in-futures)
-  - [4.4. 👍🏻 强制在阻塞 I/O 中使用 Scala 的`BlockContext`](sections/4-concurrency-parallelism.md#44-must-use-scalas-blockcontext-on-blocking-io)
+  - [4.4. 👍 强制在阻塞 I/O 中使用 Scala 的`BlockContext`](sections/4-concurrency-parallelism.md#44-must-use-scalas-blockcontext-on-blocking-io)
   - [4.5. ❎ 不应该阻塞](sections/4-concurrency-parallelism.md#45-should-not-block)
   - [4.6. ✅ 应该为阻塞 I/O 使用单独的线程池](sections/4-concurrency-parallelism.md#46-should-use-a-separate-thread-pool-for-blocking-io)
   - [4.7. ✅ 所有公共 APIs 都应该为线程安全](sections/4-concurrency-parallelism.md#47-all-public-apis-should-be-thread-safe)
   - [4.8. ✅ 应该避免共享读取时出现竞争](sections/4-concurrency-parallelism.md#48-should-avoid-contention-on-shared-reads)
-  - [4.9. 👍🏻 强制为通过异步边界进行通信的每个组件或行为体提供定义明确并记录在案的协议](sections/4-concurrency-parallelism.md#49-must-provide-a-clearly-defined-and-documented-protocol-for-each-component-or-actor-that-communicates-over-async-boundaries)
+  - [4.9. 👍 强制为通过异步边界进行通信的每个组件或行为体提供定义明确并记录在案的协议](sections/4-concurrency-parallelism.md#49-must-provide-a-clearly-defined-and-documented-protocol-for-each-component-or-actor-that-communicates-over-async-boundaries)
   - [4.10. ✅ 应该始终倾向于单个生产者的方案](sections/4-concurrency-parallelism.md#410-should-always-prefer-single-producer-scenarios)
   - [4.11. 👎 禁止硬编码线程池/执行上下文](sections/4-concurrency-parallelism.md#411-must-not-hardcode-the-thread-pool--execution-context)
 
