@@ -40,7 +40,7 @@
   - [2.10. 👎 禁止使用`Option.get`](sections/2-language-rules.md#210-must-not-use-optionget)
   - [2.11. 👎 禁止使用Java的日期或日历，而不是使用`java.time`(JSR-310)](sections/2-language-rules.md#211-must-not-use-javas-date-or-calendar-instead-use-javatime-jsr-310)
   - [2.12. ❎ 不应该使用`Any`或`AnyRef`或`isInstanceOf`/`asInstanceOf`](sections/2-language-rules.md#212-should-not-use-any-or-anyref-or-isinstanceof--asinstanceof)
-  - [2.13. 👍🏻 必须将日期序列化为 Unix 时间戳或 ISO 8601](sections/2-language-rules.md#213-must-serialize-dates-as-either-unix-timestamp-or-as-iso-8601)
+  - [2.13. 👍 必须将日期序列化为 Unix 时间戳或 ISO 8601](sections/2-language-rules.md#213-must-serialize-dates-as-either-unix-timestamp-or-as-iso-8601)
   - [2.14. 👎 禁止使用魔法值](sections/2-language-rules.md#214-must-not-use-magic-values)
   - [2.15. ❎ 不应该使用`var`作为共享状态](sections/2-language-rules.md#215-should-not-use-var-as-shared-state)
   - [2.16. ✅ 公共函数应该具有显式的返回类型](sections/2-language-rules.md#216-public-functions-should-have-an-explicit-return-type)
