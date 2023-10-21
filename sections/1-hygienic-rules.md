@@ -6,6 +6,8 @@
 
 ### 1.1. SHOULD enforce a reasonable line length
 
+> 应该强制实行合理的代码行长度
+
 关于排版有一门完整的科学表明，当文本行太宽时，人们会失去注意力，一行长的文字会让人很难判断该行的开始或结束位置，并且很难继续下一行，因为你的眼睛必须从右到左移动很多。这也使得扫描重要细节变得困难。
 
 在排版中，最佳行长被认为是 50 到 70 个字符之间。
@@ -23,6 +25,8 @@
 
 
 ### 1.2. MUST NOT rely on a SBT or IDE plugin to do the formatting for you
+
+> 不要依靠 SBT 或 IDE 插件进行代码格式化 
 
 集成开发环境和 SBT 插件可以提供很大的帮助，但如果你想使用它们来自动格式化你的代码，那就要小心了。
 
@@ -113,15 +117,21 @@ val result = service.something(
 
 ### 1.3. SHOULD break long functions
 
+> 应该避免长函数
+
 理想情况下，函数应该只有几行。如果行数太多，我们就需要将其拆分成更小的函数，并为它们命名。
 
 请注意，在 Scala 中，我们不一定必须在其他作用域中提供此类中间函数，这里的目的主要是为了提高可读性，因此在 Scala 中，我们可以使用内部函数将逻辑分解为多个部分。
 
 ### 1.4. MUST NOT introduce spelling errors in names and comments
 
+> 不要在命名和注释中引入拼写错误
+
 拼写错误非常烦人，会打断读者的阅读进度。使用拼写检查器。智能的集成开发环境具有内置的拼写检查器。请注意带下划线的拼写警告并修复它们。
 
 ### 1.5. Names MUST be meaningful
+
+> 命名必须要有意义
 
 *"计算机科学中只有两件事很难：缓存失效和命名。"* —— Phil Karlton
 
@@ -158,6 +168,6 @@ def query(id: Long)(implicit ec: ExecutionContext, c: WSClient): Future[Response
 def processItems(people: Seq[Person]) = ???
 ```
 
-这是不可取的，因为这个函数的命名表示了一个副作用（`process` 是一个动词，表示命令），但它并没有描述我们要对这些人做什么。`Items` 后缀毫无意义，因为我们可以使用 `processThingy`、`processRows`、`processStuff`，但表达的意思仍然是一样的 —— 什么都没有。它还会增加视觉上的混乱，因为字数越多，要阅读的文字就越多，而无意义的字只是噪音。
+这是不可取的，因为这个函数的命名表示了一个副作用（`process` 是一个动词，表示处理/加工），但它并没有描述我们要对这些人做什么。`Items` 后缀毫无意义，因为我们可以使用 `processThingy`、`processRows`、`processStuff`，但表达的意思仍然是一样的 —— 什么都没有。它还会增加视觉上的混乱，因为字数越多，要阅读的文字就越多，而无意义的字只是噪音。
 
 正确选择描述性名称 —— 好。废话连篇的名称 —— 不好。

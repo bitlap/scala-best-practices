@@ -4,15 +4,11 @@
 
 ### 2.1. MUST NOT use "return"
 
-The `return` statement from Java signals a side-effect - unwind the
-stack and give this value to the caller. In a language in which the
-emphasis is on side-effect-full programming, this makes sense. However
-Scala is an expression oriented language in which the emphasis is on
-controlling/limiting side-effects and `return` is not idiomatic.
+> 不要使用`return`
 
-To make matters worse, `return` probably doesn't behave as you think
-it does. For example in a Play controller, try doing this:
+Java 的`return`语句会产生副作用，即释放堆栈并将此值交给调用者。在一种强调全副作用的编程语言中，这样做是合理的。然而，Scala 是一种面向表达式的语言，其重点在于控制/限制副作用，因此`return`语句并不习惯。
 
+更糟糕的是，`return`的行为可能并不像你想象的那样。例如，在 Play 控制器中，尝试执行以下操作：
 ```scala
 def action = Action { request =>
   if (someInvalidationOf(request))
@@ -22,64 +18,41 @@ def action = Action { request =>
 }
 ```
 
-In Scala, a `return` statement inside a nested anonymous function is
-implemented by throwing and catching a `NonLocalReturnException`. It
-says so in the
-[Scala Language Specification, section 6.20](http://www.scala-lang.org/docu/files/ScalaReference.pdf).
+在 Scala 中，嵌套匿名函数内的`return`语句是通过抛出和捕获`NonLocalReturnException`来实现的。[Scala 语言规范](https://scala-lang.org/files/archive/spec/2.13/spec.pdf) 第 6.20 节是这么说的。
 
-Besides, `return` is anti structural programming, as functions can be
-described with multiple exit points and if you need `return`, like in
-those gigantic methods with lots of if/else branches, the presence of
-a `return` is a clear signal that the code stinks, a magnet for future
-bugs and is thus in urgent need of refactoring.
+此外，`return` 是反结构编程，因为函数可以有多个退出点，如果你需要`return`，比如在那些有大量`if/else`分支的巨大方法中，`return`的存在是一个明确的信号，表明代码很糟糕，未来很容易引起BUG，因此急需重构。
 
 ### 2.2. SHOULD use immutable data-structures
 
-Immutable data-structures are facts that can be compared and reasoned
-about. Mutable things are error-prone buckets. You should never use a
-mutable data-structure unless you're able to defend it and there are
-really, really few places in which a mutable data-structure is
-defensible.
+> 应该使用不可变数据结构
 
-Lets exemplify:
+不可变的数据结构是可以比较和推理的事实。可变的东西是容易出错的桶（掉坑）。不应该使用可变数据结构，除非你能保护它，但是能保护可变数据结构的地方又是很少的。
+
+让我们举例说明：
 
 ```scala
 trait Producer[T] {
  def fetchList: List[T]
 }
 
-// consumer side
+// 消费端
 someProducer.fetchList
 ```
 
-Question - if the `List` returned above is mutable, what does that say
-about the `Producer` interface?
+问题 - 如果上面返回的 `List` 是可变的，这对 `Producer` 接口意味着什么？
 
-Here are some problems:
+这里存在一些问题：
+1. 如果这个 `List` 是在消费者之外的另一个线程上生成的，则可能会同时出现可见性和原子性问题 —— 你无法知道是否会发生这种情况，除非你查看生产者的实现。
+2. 即使这个列表实际上是不可变的（即仍然可变，但在向消费者发出信号后就不再被修改），你也不知道它是否会向其他可能自行修改它的消费者发出信号，因此你无法推理能用它做什么。
+3. 即使描述对此列表的访问必须同步，问题是 —— 你打算同步哪个锁？你能确定锁的正确顺序吗？锁是不可组合的。
 
-1. if this List is produced on another thread than the consumer, one
-   can have both visibility and atomicity problems - you can't know
-   whether that will happen, unless you take a look at the Producer's
-   implementation.
-
-2. even if this List is effectively immutable (i.e. still mutable, but
-   no longer modified after being signaled to the Consumer), you don't
-   know if it will be signaled to other Consumers that may modify it
-   by themselves, so you can't reason about what you can do with it.
-
-3. even if it is described that access to this List must be
-   synchronized, problem is - on which lock are you going to
-   synchronize?  Are you sure you'll get the locking order right?
-   Locks are not composable.
-
-So there you have it - a public API exposing a mutable data-structure
-is an abomination of nature, leading to problems that can be worse
-than what happens when doing manual memory management.
+所以，这就是问题所在 —— 暴露可变数据结构的公共应用程序接口是一种可恶的行为，它导致的问题可能比手动内存管理更糟糕。
 
 ### 2.3. SHOULD NOT update a `var` using loops or conditions
 
-It's a mistake that most Java developers do when they come to Scala. Example:
+> 不应该使用循环和条件更新`var`
 
+这是大多数 Java 开发人员在使用 Scala 时都会犯的错误。例子：
 ```scala
 var sum = 0
 for (elem <- elements) {
@@ -87,24 +60,17 @@ for (elem <- elements) {
 }
 ```
 
-Avoid doing this, prefer the available operators instead, like `foldLeft`:
-
+避免这样做，而是使用函数，如 `foldLeft`：
 ```scala
 val sum = elements.foldLeft(0)((acc, e) => acc + e.value)
 ```
 
-Or even better, know the standard library and always prefer to
-use the built-in functions - the more expressive you go, the less bugs
-you'll have:
-
+或者更好的办法是，了解标准库，并始终偏向于使用内置函数 —— 表现力越强，BUG就越少：
 ```scala
 val sum = elements.map(_.value).sum
 ```
 
-In the same spirit, you shouldn't update a partial result with a condition.
-Example:
-
-
+本着同样的精神，你不应该使用条件更新部分结果。例如：
 ```scala
 def compute(x) = {
   var result = resultFrom(x)
@@ -120,10 +86,7 @@ def compute(x) = {
 }
 ```
 
-Prefer expressions and immutability. The code will be more readable
-and less error-prone, since it makes the branches more explicit and that's
-a good thing:
-
+首选表达式和不变性。代码的可读性将会更高，不易出错，因为它使分支更明确，这是件好事：
 ```scala
 def computeResult(x) = {
   val r = resultFrom(x)
@@ -134,24 +97,15 @@ def computeResult(x) = {
 }
 ```
 
-And you know, as soon as the branches get too complex, just as was said in the
-discussion on `return`, that's a sign that the *code smells* and is in need
-of refactoring, which is a good thing.
+而你知道，只要分支变得过于复杂，就像关于`return`的讨论中所说的那样，这就表明代码有*异味*，需要重构，这是一件好事。
 
 ### 2.4. SHOULD NOT define useless traits
 
-There was this Java Best Practice that said "*program to an interface,
-not to an implementation*", a best practice that has been cargo-cult-ed
-to the point that people started defining completely useless
-interfaces in their code. Generally speaking, that rule is healthy,
-but it refers to the general engineering need of hiding implementation
-details especially details of modifying state (encapsulation) and not
-to slap interface declarations that often leak implementation details
-anyway.
+> 不应该定义无用的特质
 
-Defining traits is also a burden for readers of that code, because it
-signals a need for polymorphism. Example:
+Java 的最佳实践是 "根据接口编程，而不是根据实现编程"。一般来说，这条规则是健康的，但它指的是隐藏实现细节（尤其是修改状态的细节）的一般工程需求（封装），而不是指经常泄露实现细节的接口声明。
 
+定义特质对代码读者来说也是一种负担，因为这意味着需要多态性。举例说明：
 ```scala
 trait PersonLike {
   def name: String
@@ -162,26 +116,13 @@ case class Person(name: String, age: Int)
   extends PersonLike
 ```
 
-Readers of this code might come to the conclusion that there are
-instances in which overriding `PersonLike` is desirable. That couldn't
-be further from the truth - `Person` is perfectly described by its
-case class as a data-structure without behavior. In other words it
-describes the shape of your data and if you need to override this
-shape for some unknown reason, then this trait is badly defined
-because it imposes the shape of your data and that's about the only
-thing you can override. You can always come up with traits later, if
-you're in need of polymorphism, after your needs evolve.
+阅读这段代码的读者可能会得出这样的结论：在某些情况下，覆盖 `PersonLike` 是可取的。这与事实相去甚远 —— `Person`在其样例类中被完美地描述为一种无行为的数据结构。换句话说，它描述了数据的形状，如果你因为某种未知的原因需要覆盖这种形状，那么这个特质的定义就很糟糕，因为它强加了数据的形状，而这是你唯一可以覆盖的东西。如果你需要多态性，需求发生变化之后，你可以随时提出特质。
 
-And if you're thinking that you may need to override the source of
-this (as in to fetch the person's `name` from the DB on first access),
-OMG don't do that!
+如果你认为你可能需要覆盖这个源（比如在第一次访问时从数据库中获取人名），请不要这么做！
 
-Note that I'm not talking about algebraic data structures (i.e. sealed
-traits that are signaling a closed set of choices - like `Option`).
+请注意，我不是在谈论代数数据结构（即表示封闭选择集的密封特质 —— 例如`Option`）。
 
-Even in those cases in which you think the issue is clear-cut, it may
-not be. Lets take this example:
-
+即使在你认为问题已经很清楚的情况下，也未必如此。让我们举个例子：
 ```scala
 trait DBService {
   def getAssets: Future[Seq[(AssetConfig, AssetPersistedState)]]
@@ -190,13 +131,9 @@ trait DBService {
 }
 ```
 
-This snippet is taken from real-world code - we've got a `DBService`
-that handles either queries or persistence in a database. Those two
-methods are actually unrelated, so if you only need to fetch the
-assets, why depend on things you don't need in components that require
-DB interaction?
+这段代码来自真实场景 —— 我们有一个`DBService`，它可以处理查询或数据库中的持久化。这两种方法实际上是不相关的，所以如果你只需要获取资产，为什么要依赖那些需要数据库交互的组件中你不需要的东西呢？
 
-Lately my code looks a lot like this:
+最近，我的代码看起来像这样：
 
 ```scala
 final class AssetsObservable
@@ -212,88 +149,64 @@ object AssetsObservable {
 }
 ```
 
-See, I do not need to mock an entire `DBService` in order to test the
-above.
+瞧，我不需要模拟整个`DBService`来测试上述功能。
 
 ### 2.5. MUST NOT use "var" inside a case class
 
-Case classes are syntactic sugar for defining classes in which - all
-constructor arguments are public and immutable and thus part of the
-value's identity, have structural equality, a corresponding hashCode
-implementation and apply/unapply auto-generated functions provided by
-the compiler.
+> 不要在样例类中使用`var`
 
-By doing this:
+样例类是定义类的语法糖，其中所有构造函数参数都是公共的和不可变的，因此是值标识的一部分，具有结构相等性、相应的`hashCode`实现以及编译器提供的自动生成的`apply/unapply`函数。
+
+通过这样做：
 
 ```scala
 case class Sample(str: String, var number: Int)
 ```
 
-You just broke its equality and hashCode operation. Now try using it
-as a key in a map.
+你刚刚破坏了它的相等性和`hashCode`操作。现在尝试将其用作map中的键。
 
-As a general rule of thumb, structural equality only works for
-immutable things, because the equality operation must be stable (and
-not change according to the object's history). Case classes are for
-strictly immutable things. If you need to mutate stuff, don't use case
-classes.
+一般来说，结构相等只适用于不可变的事物，因为相等操作必须是稳定的（不会随对象的历史而改变）。样例类适用于严格不可变的事物。如果需要更改对象，就不要使用样例类。
 
-In the approximate words of Fogus in "The Joy of Clojure" or Baker in
-his paper from 1993: if any two mutable objects resolve as being equal
-now, then there’s no guarantee that they will a moment from now. And
-if two objects aren’t equal forever, then they’re technically never
-equal ;-)
+用 Fogus 在“The Joy of Clojure”或 Baker 在 1993 年发表的论文中的近似说法：如果任何两个可变对象现在解析为相等，并不能保证它们之后还将相等。如果两个对象永远不相等，那么它们在技术上就永远不相等;-)
 
 ### 2.6. SHOULD NOT declare abstract "var" members
 
-It's a bad practice to declare abstract vars in abstract classes or
-traits. Do not do this:
+> 不应该定义抽象的`var`成员
 
+在抽象类或特质中声明抽象变量是一种不好的做法。请勿这样做：
 ```scala
 trait Foo {
   var value: String
 }
 ```
 
-Instead, prefer to declare abstract things as `def`:
-
+相反，我们更倾向于将抽象事物声明为 `def`：
 ```scala
 trait Foo {
   def value: String
 }
 
-// can then be overridden as anything
+// 然后可以被覆盖为任何东西
 class Bar(val value: String) extends Foo
 ```
 
-The reason has to do with the imposed restriction - a `var` can only
-be overridden with a `var`. The way to allow freedom to choose on
-inheritance is to use `def` for abstract members.  And why would you
-impose the restriction to use a `var` on those that inherit from your
-interface. `def` is generic so use it instead.
+原因与强制的限制有关 —— `var`只能被`var`覆盖，允许在继承上自由选择的方法是对抽象成员使用`def`定义。为什么要对那些从接口继承的变量施加限制呢？`def`是通用的，因此请使用它。
 
 ### 2.7. MUST NOT throw exceptions for validations of user input or flow control
 
-Two reasons:
+> 不要在验证用户输入或流控制时抛出异常
 
-1. it goes against the principles of structured programming as a
-   routine ends up having multiple exit points and are thus harder to
-   reason about - with the stack unwinding happening being an awful and
-   often unpredictable side-effect
-2. exceptions aren't documented in the function's signature - Java
-   tried fixing this with the checked exceptions concept, which in
-   practice was awful as people simply ignored them
+理由有二:
+1. 它违背了结构化程序设计的原则，因为一个例程最终会有多个退出点，因此更难推理 —— 堆栈展开的发生是一个可怕的、通常不可预测的副作用。
+2. 异常没有记录在函数的签名中 —— Java 试图通过检查异常的概念来解决这个问题，但在实践中却非常糟糕，因为人们直接忽略了它们。
 
-Exceptions are useful for only one thing - signaling unexpected errors
-(bugs) up the stack, such that a supervisor can catch those errors and
-decide to do things, like log the errors, send notifications,
-restarting the guilty component, etc...
+异常只对一件事有用 —— 向堆栈传递意外错误（bug）的信号，这样监督者就能捕捉到这些错误，并决定采取一些措施，如记录错误、发送通知、重启有问题的组件等。
 
-As an appeal to authority, it's reasonable to reference
-[Functional Programming with Scala](http://www.manning.com/bjarnason/),
-chapter 4.
+作为对权威的呼吁，参考 [Functional Programming with Scala](http://www.manning.com/bjarnason/) 第 4 章是合理的。
 
 ### 2.8. MUST NOT catch Throwable when catching Exceptions
+
+> 捕获`Exception`时，不要捕获`Throwable`
 
 Never, never, never do this:
 
@@ -329,6 +242,8 @@ try {
 ```
 
 ### 2.9. MUST NOT use "null"
+
+> 不要使用`null`
 
 You must avoid using `null`. Prefer Scala's `Option[T]` instead. Null
 values are error prone, because the compiler cannot protect
@@ -393,6 +308,8 @@ list.flatMap(x => Some(x).filter(_ % 2 == 0))
 
 ### 2.10. MUST NOT use `Option.get`
 
+> 不要使用`Option.get`
+
 You might be tempted to do this:
 
 ```scala
@@ -422,6 +339,8 @@ val result = someValue.map(_ + 1)
 
 ### 2.11. MUST NOT use Java's Date or Calendar, instead use `java.time` (JSR-310)
 
+> 不要使用 Java 的日期或日历，而是使用`java.time` (JSR-310)
+
 Java's Date and Calendar classes from the standard library are awful
 because:
 
@@ -438,6 +357,8 @@ introduced in Java 8 - or if you're stuck in pre-Java 8 land, use [Joda-Time](ht
 its spiritual ancestor.
 
 ### 2.12. SHOULD NOT use Any or AnyRef or isInstanceOf / asInstanceOf
+
+> 不应该使用`Any`或`AnyRef`或`isInstanceOf/asInstanceOf`
 
 Avoid using Any or AnyRef or explicit casting, unless you've got a
 really good reason for it. Scala is a language that derives value from
@@ -486,6 +407,8 @@ json match {
 
 ### 2.13. MUST serialize dates as either Unix timestamp, or as ISO 8601
 
+> 不要将日期序列化为 Unix 时间戳或 ISO 8601
+
 Unix timestamps, provided that we are talking about the number of
 seconds or milliseconds since 1970-01-01 00:00:00 UTC (with emphasis
 on UTC) are a decent cross-platform serialization format. It does have
@@ -496,6 +419,8 @@ Avoid anything else and also when storing dates without a timezone
 attached (like in MySQL), always express that info in UTC.
 
 ### 2.14. MUST NOT use magic values
+
+> 不要使用魔法值
 
 Although not uncommon in other languages to use "magic" (special)
 values like `-1` to signal particular outcomes, in Scala there are a
@@ -511,6 +436,8 @@ val index = list.find(someTest).getOrElse(-1)
 ```
 
 ### 2.15. SHOULD NOT use "var" as shared state
+
+> 不应该使用`var`作为共享状态
 
 Avoid using "var" at least when speaking about shared mutable
 state. Because if you do have shared state expressed as vars, you'd
@@ -544,6 +471,8 @@ you from lots and lots of headaches later. And it's best to avoid
 mutation entirely.
 
 ### 2.16. Public functions SHOULD have an explicit return type
+
+> 公共函数应该具有显式的返回类型
 
 Prefer this:
 
@@ -588,6 +517,8 @@ signature so everything that depends on it must be recompiled.
 
 ### 2.17. SHOULD NOT define case classes nested in other classes
 
+> 不应该定义嵌套在其他类中的样例类
+
 It is tempting, but you should almost never define nested case classes
 inside another object/class because it messes with Java's
 serialization. The reason is that when you serialize a case class it
@@ -603,6 +534,8 @@ And the thing with case classes specifically is that:
 Prefer flat hierachies.
 
 ### 2.18 MUST NOT include classes, traits and objects inside package objects
+
+> 不要在包对象中包含类、特质和对象
 
 Classes, including case classes, traits and objects do not belong
 inside package objects. It is unnecessary, confuses the compiler and
@@ -647,6 +580,8 @@ package object dsl {
 ```
 
 ### 2.19 SHOULD use head/tail and init/last decomposition only if they can be done in constant time and memory
+
+> 应该仅在head/tail和init/last分解可以在常量时间和内存中完成时，才使用它们
 
 Example of head/tail decomposition:
 
@@ -709,6 +644,8 @@ I don't think that init/last decomposition is all that common. In general, it is
 
 ### 2.20 MUST NOT use `Seq.head`
 
+> 使用`Seq.head`
+
 You might be tempted to this:
 
 ```scala
@@ -747,6 +684,8 @@ Alternatives:
 3. using `NonEmptyList` if it is required that the list should never be empty. (See [cats](https://typelevel.org/cats/datatypes/nel.html), [scalaz](https://github.com/scalaz/scalaz/blob/series/7.3.x/core/src/main/scala/scalaz/NonEmptyList.scala), ...)
 
 ### 2.21 Case classes SHOULD be final
+
+> 样例类应该标记为`final`
 
 Extending a case class will lead to unexpected behaviour. Observe the following:
 ```scala
@@ -788,6 +727,8 @@ final case class User(name: String, id: Long)
 ```
 
 ### 2.22 SHOULD NOT use `scala.App`
+
+> 不应该使用`scala.App`
 
 `scala.App` is often used to denote the entrypoint of the application:
 
