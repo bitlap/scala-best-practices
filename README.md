@@ -11,7 +11,7 @@
 
 - MUST 👍 强制/必须
 - SHOULD ✅ 推荐/应该
-- SHOULD NOT ❎ 不推荐
+- SHOULD NOT ❎ 不推荐/不应该
 - MUST NOT 👎禁止
 
 
