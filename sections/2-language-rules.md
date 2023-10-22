@@ -116,11 +116,12 @@ case class Person(name: String, age: Int)
   extends PersonLike
 ```
 
-阅读这段代码的读者可能会得出这样的结论：在某些情况下，覆盖 `PersonLike` 是可取的。这与事实相去甚远 —— `Person` 在其样例类中被完美地描述为一种无行为的数据结构。换句话说，它描述了数据的形状，如果你因为某种未知的原因需要覆盖这种形状，那么这个特质的定义就很糟糕，因为它强加了数据的形状，而这是你唯一可以覆盖的东西。如果你需要多态性，需求发生变化之后，你可以随时提出特质。
+阅读这段代码的读者可能会得出这样的结论：在某些情况下，覆盖 `PersonLike` 是可取的。这与事实相去甚远 —— `Person` 在其样例类中被完美地描述为一种无行为的数据结构。
+换句话说，它描述了数据的形状，如果你因为某种未知的原因需要覆盖这种形状，那么这个特质的定义就很糟糕，因为它强加了数据的形状，而这是你唯一可以覆盖的东西。如果你需要多态性，需求发生变化之后，你可以随时提出特质。
 
 如果你认为你可能需要覆盖这个源（比如在第一次访问时从数据库中获取人名），请不要这么做！
 
-请注意，我不是在谈论代数数据结构（即表示封闭选择集的密封特质 —— 例如 `Option`）。
+请注意，我不是在讨论代数数据结构（即表示封闭选择集的密封特质 —— 例如 `Option`）。
 
 即使在你认为问题已经很清楚的情况下，也未必如此。让我们举个例子：
 ```scala
@@ -219,7 +220,8 @@ try {
 }
 ```
 
-永远不要捕获 `Throwable`，因为我们谈论的可能是永远不应该被捕获的极其致命的异常，这可能会导致进程崩溃。 例如，如果 JVM 抛出内存不足的错误，即使在 `catch` 子句中重新抛出异常，也可能为时已晚。考虑到进程内存不足，垃圾收集器可能会接管并冻结一切，使进程以不可恢复的僵尸状态结束。这意味着外部监督程序(如 Upstart）将没有机会重启它。
+永远不要捕获 `Throwable`，因为我们讨论的可能是永远不应该被捕获的极其致命的异常，这可能会导致进程崩溃。 例如，如果 JVM 抛出内存不足的错误，即使在 `catch` 子句中重新抛出异常，也可能为时已晚。
+考虑到进程内存不足，垃圾收集器可能会接管并冻结一切，使进程以不可恢复的僵尸状态结束。这意味着外部监督程序(如 Upstart）将没有机会重启它。
 
 请这样做：
 
@@ -316,7 +318,7 @@ val result = someValue.map(_ + 1)
 
 ### 2.11. MUST NOT use Java's Date or Calendar, instead use `java.time` (JSR-310)
 
-> 不要使用 Java 的日期或日历，而是使用 `java.time` (JSR-310)
+> 不要使用 Java 的日期或日历，而是使用 `java.time` （JSR-310）
 
 Java 标准库中的日期和日历类非常糟糕，因为：
 1. 结果对象是可变的，这对于表达日期没有意义，日期应该是一个值（如果你必须在有字符串的地方使用 `StringBuffer`，你会有什么感觉？）
@@ -325,19 +327,14 @@ Java 标准库中的日期和日历类非常糟糕，因为：
 4. GMT 和 UTC 之间没有区别
 5. 年份用 2 位数表示，而不是 4 位数
 
-相反，请始终使用 Java 8 中引入的 [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) API - 或者如果你陷入 Java 8 之前的领域，请使用 [`Joda-Time`](http://www.joda.org/joda-time/)，它是 `java.time` 的精神祖先。。
+相反，请始终使用 Java 8 中引入的 [`java.time`](https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html) API —— 或者如果你陷入 Java 8 之前的领域，请使用 [`Joda-Time`](http://www.joda.org/joda-time/)，它是 `java.time` 的精神祖先。。
 
 
 ### 2.12. SHOULD NOT use Any or AnyRef or isInstanceOf / asInstanceOf
 
 > 不应该使用 `Any` 或 `AnyRef` 或 `isInstanceOf/asInstanceOf`
 
-Avoid using Any or AnyRef or explicit casting, unless you've got a
-really good reason for it. Scala is a language that derives value from
-its expressive type system, usage of Any or of typecasting represents
-a hole in this expressive type system and the compiler doesn't know
-how to help you there. In general, something like this is bad:
-
+避免使用 Any、AnyRef 或显式类型（强制）转换，除非有非常充分的理由。Scala 是一种从其富于表现力的类型系统中获取价值的语言，使用 `Any` 或（强制）类型转换代表了这种富于表现力的类型系统中的一个漏洞，而编译器并不知道如何帮助你。一般来说，这样做是不好的：
 ```scala
 val json: Any = ???
 
@@ -349,10 +346,7 @@ else
   ???
 ```
 
-Often we are using Any when doing deserialization. Instead of working
-with Any, think about the generic type you want and the set of
-sub-types you need, and come up with an Algebraic Data-Type:
-
+在进行反序列化时，我们经常使用 `Any`。与其使用 `Any`，不如考虑你想要的泛型类型和所需的所有子类型，并提出代数数据类型（Algebraic Data-Type，ADT）：
 ```scala
 sealed trait JsValue
 
@@ -364,10 +358,7 @@ case class JsArray(list: Seq[JsValue]) extends JsValue
 case object JsNull extends JsValue
 ```
 
-Now, instead of operating on Any, we can do pattern matching on
-JsValue and the compiler can help us here on missing branches, since
-the choice is finite. This will trigger a warning on missing branches:
-
+现在，我们可以对 `JsValue` 进行模式匹配，编译器可以帮助我们解决分支缺失的问题，因为选择是有限的。这将触发对缺失分支的警告：
 ```scala
 val json: JsValue = ???
 json match {
@@ -381,52 +372,38 @@ json match {
 
 > 必须将日期序列化为 Unix 时间戳或 ISO 8601
 
-Unix timestamps, provided that we are talking about the number of
-seconds or milliseconds since 1970-01-01 00:00:00 UTC (with emphasis
-on UTC) are a decent cross-platform serialization format. It does have
-the disadvantage that it has limits in what it can express. ISO-8601
-is a decent serialization format supported by most libraries.
+Unix 时间戳，前提是我们讨论的是自 `1970-01-01 00:00:00 UTC`（强调UTC） 以来的秒数或毫秒数，它是一种不错的跨平台序列化格式。
+它确实有一个缺点，那就是它的表达能力有限。ISO-8601 是一种不错的序列化格式，大多数程序库都支持这种格式。
 
-Avoid anything else and also when storing dates without a timezone
-attached (like in MySQL), always express that info in UTC.
+避免其他任何事情，并且当存储没有附加时区的日期（如 MySQL）时，始终用 UTC 表示该信息。
 
 ### 2.14. MUST NOT use magic values
 
 > 不要使用魔法值
 
-Although not uncommon in other languages to use "magic" (special)
-values like `-1` to signal particular outcomes, in Scala there are a
-range of types to make intent clear. `Option`, `Either`, `Try` are
-examples. Also, in case you want to express more than a boolean
-success or failure, you can always come up with an algebraic data
-type.
+虽然在其他语言中使用 “魔法”（特殊）值（如值 `-1`）来表示特定结果并不罕见，但在 Scala 中有一系列的类型使用程序意图更明确。
+`Option`、`Either`、`Try` 就是这样的例子。此外，如果你想表达的不仅仅是布尔值的 `true` 或 `false`，你总能想出一个代数数据类型。
 
-Don't do this:
-
+不要这样做：
 ```scala
 val index = list.find(someTest).getOrElse(-1)
 ```
 
 ### 2.15. SHOULD NOT use "var" as shared state
 
-> 不应该使用`var`作为共享状态
+> 不应该使用 `var` 作为共享状态
 
-Avoid using "var" at least when speaking about shared mutable
-state. Because if you do have shared state expressed as vars, you'd
-better synchronize it and it gets ugly fast. Much better is to avoid
-it. In case you really need mutable shared state, use an atomic
-reference and store immutable things in it. Also checkout
-[Scala-STM](https://nbronson.github.io/scala-stm/).
+避免使用 `var`，至少在涉及共享的可变状态时。因为如果共享状态是以 `var` 表示的，就必须最好是同步，否则很快就会变得很难看。
+更好的办法是避免它。如果您真的需要可变的共享状态，请使用原子引用并在其中存储不可变的内容。还可以查看 [Scala-STM](https://nbronson.github.io/scala-stm/)
 
-So instead of something like this:
-
+所以，不要这样做：
 ```scala
 class Something {
   private var cache = Map.empty[String, String]
 }
 ```
 
-If you can't really avoid that variable, prefer doing this:
+如果实在无法避免这个变量，最好还是这样做：
 
 ```scala
 import java.util.concurrent.atomic._
@@ -437,16 +414,13 @@ class Something {
 }
 ```
 
-Yes, it introduces overhead due to the synchronization required, which
-in the case of an atomic reference means spin loops. But it will save
-you from lots and lots of headaches later. And it's best to avoid
-mutation entirely.
+是的，由于需要同步，它会带来开销。在原子引用的情况下，这意味着自旋循环。但它会帮你避免之后的很多麻烦。最好完全避免突变。
 
 ### 2.16. Public functions SHOULD have an explicit return type
 
-> 公共函数应该具有显式的返回类型
+> 应该为公共函数显式声明返回类型
 
-Prefer this:
+最好是这样：
 
 ```scala
 def someFunction(param1: T1, param2: T2): Result = {
@@ -454,7 +428,7 @@ def someFunction(param1: T1, param2: T2): Result = {
 }
 ```
 
-To this:
+而不是这样：
 
 ```scala
 def someFunction(param1: T1, param2: T2) = {
@@ -462,17 +436,11 @@ def someFunction(param1: T1, param2: T2) = {
 }
 ```
 
-Yeah, type inference on the result of a function is great and all, but
-for public methods:
+对函数结果进行类型推断固然很好，但是对于公共方法：
+1. 依靠集成开发环境或检查实现来查看返回类型是不行的。
+2. Scala 目前会尽可能推导出最特殊的类型，因为在 Scala 中，函数的返回类型是协变的，因此您可能会实际上会返回一个非常丑陋的类型
 
-1. it's not OK to rely on an IDE or to inspect the implementation in
-   order to see the returned type
-2. Scala currently infers the most specialized type possible, because
-   in Scala the return type on functions is covariant, so you might
-   actually get a really ugly type back
-
-For example, what is the returned type of this function:
-
+例如，该函数返回的类型是什么：
 ```scala
 def sayHelloRunnable(name: String) = new Runnable {
   def sayIt() = println(s"Hello, $name")
@@ -480,40 +448,29 @@ def sayHelloRunnable(name: String) = new Runnable {
 }
 ```
 
-Do you think it's `Runnable`?
-Wrong, it's `Runnable{def sayIt(): Unit}`.
+你认为它是 `Runnable` 吗？
+不对，它是 `Runnable{def sayIt(): Unit}`。
 
-As a side-effect, this also increases compilation times, as whenever
-`sayHelloRunnable` changes implementation, it also changes the
-signature so everything that depends on it must be recompiled.
+作为副作用，这也增加了编译时间，因为每当 `sayHelloRunnable` 变更实现时，它也会更改签名，因此所有依赖于它的代码都必须重新编译。
 
 ### 2.17. SHOULD NOT define case classes nested in other classes
 
 > 不应该定义嵌套在其他类中的样例类
 
-It is tempting, but you should almost never define nested case classes
-inside another object/class because it messes with Java's
-serialization. The reason is that when you serialize a case class it
-closes over the "this" pointer and serializes the whole object, which
-if you are putting in your App object means for every instance of a
-case class you serialize the whole world.
+这很诱人，但你几乎永远都不应该在另一个对象/类中定义嵌套的样例类，因为这会扰乱 Java 的序列化。
+原因是当你序列化一个样例类时，它会关闭 “this” 指针并序列化整个对象。
 
-And the thing with case classes specifically is that:
+样例类的具体特点是：
+1. 人们希望案例类是不可变的（一个值，一个事实），因此
+2. 人们期望样例类能够很容易地序列化
 
-1. one expects a case class to be immutable (a value, a fact) and hence
-2. one expects a case class to be easily serializable
-
-Prefer flat hierachies.
+更偏好扁平的类型层次结构。
 
 ### 2.18 MUST NOT include classes, traits and objects inside package objects
 
 > 不要在包对象中包含类、特质和对象
 
-Classes, including case classes, traits and objects do not belong
-inside package objects. It is unnecessary, confuses the compiler and
-is therefore discouraged. For example, refrain from doing the
-following:
-
+类（包括情况类）、特质和对象都不属于包对象内部。这是不必要的，它会混淆编译器，因此不鼓励使用。例如：
 ```scala
 package foo
 
@@ -522,25 +479,22 @@ package object bar {
 }
 ```
 
-The same effect is achieved if all artifacts are inside a plain package:
-
+如果所有工件都在一个普通的包中，也能达到相同的效果：
 ```scala
 package foo.bar
 
 case object FooBar
 ```
 
-Package objects should only contain value, method and type alias
-definitions, etc.  Scala allows multiple public classes in a single
-file, and the convention is to have the first letter of the filename
-be lowercase in such cases.
+包对象应只包含值、方法和类型别名定义等。Scala 允许在单个文件中包含多个公开类，在这种情况下，文件名的第一个字母按惯例应小写。
 
 #### Implicit value classes can be defined in a package object
 
-In one rare circumstance, it makes sense to include classes defined directly in a `package object`. The reason for that is that implicit classes need to be nested inside another object/class, you cannot define a top level implicit in Scala. Nesting implicit value classes inside a `package object` also allows us to create a great importing experience for a library, as the single import of the package object will bring in all the necessary implicits.
+在一种罕见的情况下，直接在 `package object` 中的定义类是有意义的。原因是隐式类需要嵌套在另一个对象/类中，在 Scala 中无法定义顶层隐式。
+将隐式值类嵌套在 `package object` 中还可以为库创建良好的导入体验，因为只需导入包对象就可以引入所有必要的隐式。
 
-There is also no way around this, as defining the implicit value class means we cannot effectively define the implicit and the class separately, the whole point is to let the compiler avoid the runtime boxing by generating all the "right code" at compile time, by predicting the runtime boxing. This is the optimal way to achieve a pimp my library pattern performance wise, and we need the entire syntax "in one place".
-
+这也是没有办法的办法，因为定义隐式值类意味着我们不能有效地分别定义隐式和类，关键在于让编译器在编译时生成所有 “正确的代码”，通过预测运行时装箱来避免运行时装箱。
+这是优化库性能的最佳方式，我们需要将整个语法“放在一个地方”。
 ```scala
 
 package object dsl {
@@ -553,9 +507,9 @@ package object dsl {
 
 ### 2.19 SHOULD use head/tail and init/last decomposition only if they can be done in constant time and memory
 
-> 应该仅在head/tail和init/last分解可以在常量时间和内存中完成时，才使用它们
+> 应该仅在head/tail和init/last分解可以在常数时间和内存中完成时，才使用它们
 
-Example of head/tail decomposition:
+`head/tail` 分解的示例：
 
 ```scala
 def recursiveSumList(numbers: List[Int], accumulator: Int): Int =
@@ -568,22 +522,20 @@ def recursiveSumList(numbers: List[Int], accumulator: Int): Int =
   }
 ```
 
-`List` has a special head/tail extractor `::` because `List`s are **made** by always appending an element to the front of the list:
-
+`List` 有一个特殊的 `head/tail` 提取器 `::`，因为 `List` 的 **创建** 总是在列表的前面追加一个元素：
 ```scala
 val numbers = 1 :: 2 :: 3 :: Nil
 ```
 
-This is the same as:
+这等同于：
 
 ```scala
 val numbers = Nil.::(3).::(2).::(1)
 ```
 
-For this reason, both `head` and `tail` on a list need only constant time and memory! These operations are `O(1)`.
+因此，列表上的 `head` 和 `tail` 操作只需要常数时间和内存！这些操作都是 `O(1)`。
 
-There is another head/tail extractor called `+:` that works on any `Seq`:
-
+还有一种名为 `+:` 的 `head/tail` 提取器，可用于任何 `Seq`：
 ```scala
 def recursiveSumSeq(numbers: Seq[Int], accumulator: Int): Int =
   numbers match {
@@ -595,30 +547,29 @@ def recursiveSumSeq(numbers: Seq[Int], accumulator: Int): Int =
   }
 ```
 
-You can find the implementation of `+:` [here](https://github.com/scala/scala/blob/v2.12.4/src/library/scala/collection/SeqExtractors.scala). The problem is that other collections than `List` do not necessarily head/tail-decompose in constant time and memory, e.g. an `Array`:
-
+你可以在这里找到 `+:` 的实现[here](https://github.com/scala/scala/blob/v2.12.4/src/library/scala/collection/SeqExtractors.scala)。
+问题在于，除 `List` 以外的其他集合不一定能在常数时间和内存中进行 `head/tail` 分解，例如 `Array`：
 ```scala
 val numbers = Array.range(0, 10000000)
 
 recursiveSumSeq(numbers, 0)
 ```
 
-This is highly inefficient: each `tail` on an `Array` takes `O(n)` time and memory, because every time a new array needs to be created!
+这样做的效率非常低：由于每次都需要创建一个新数组，因此在 `Array` 上的每个 `tail` 都需要耗费 `O(n)` 的时间和内存！
 
-Unfortunately, the Scala collections library permits these kinds of inefficient operations. We have to keep an eye out for them.
+不幸的是，Scala 集合库允许这类低效操作。我们必须密切关注他们。
 
 ---
 
-An example for an efficient init/last decomposition is `scala.collection.immutable.Queue`. It is backed by two `List`s and the efficiency of `head`, `tail`, `init` and `last` is *amortized constant* time and memory, as explained in the [Scala collection performance characteristics](http://docs.scala-lang.org/overviews/collections/performance-characteristics.html).
+高效的 `init/last` 分解的一个例子是 `scala.collection.immutable.Queue`。它由两个 `List` 支持，`head`、`tail`、`init` 和 `last` 的效率是*摊销的常数*时间和内存，详见[Scala 集合性能特征](http://docs.scala-lang.org/overviews/collections/performance-characteristics.html)。
 
-I don't think that init/last decomposition is all that common. In general, it is analogue to head/tail decomposition. The init/last deconstructor for any `Seq` is `:+`.
-
+我认为 `init/last` 分解并不常见。一般来说，它类似于 `head/tail` 分解。任何 `Seq` 的 `init/last` 分解都是 `:+`。
 
 ### 2.20 MUST NOT use `Seq.head`
 
-> 使用`Seq.head`
+> 使用 `Seq.head`
 
-You might be tempted to this:
+你可能会有这种想法：
 
 ```scala
 val userList: List[User] = ???
@@ -627,13 +578,12 @@ val userList: List[User] = ???
 val firstName = userList.head.firstName
 ```
 
-Don't ever do this, as this will throw `NoSuchElementException` if the sequence is empty.
+千万不要这样做，因为如果序列为空，就会抛出 `NoSuchElementException` 异常。
 
-Alternatives:
-
-1. using `Seq.headOption` possibly combined with `getOrElse` or pattern matching
-
-    Example:
+替代方案：
+1. 使用 `Seq.headOption`（可能与 `getOrElse` 或模式匹配结合使用
+   
+   示例：
     
     ```scala
     val firstName = userList.headOption match {
@@ -642,9 +592,9 @@ Alternatives:
       }
     ```
 
-2. using pattern matching with the cons operator `::` if you're dealing with a `List`
+2. 使用模式匹配和 cons 运算符 `::` 处理 `List`
 
-    Example:
+    示例：
     
     ```scala
     val firstName = userList match {
@@ -653,13 +603,13 @@ Alternatives:
     }
     ```
 
-3. using `NonEmptyList` if it is required that the list should never be empty. (See [cats](https://typelevel.org/cats/datatypes/nel.html), [scalaz](https://github.com/scalaz/scalaz/blob/series/7.3.x/core/src/main/scala/scalaz/NonEmptyList.scala), ...)
+3. 如果要求列表永远不为空，则使用 `NonEmptyList`（参见 [cats](https://typelevel.org/cats/datatypes/nel.html)、[scalaz](https://github.com/scalaz/scalaz/blob/series/7.3.x/core/src/main/scala/scalaz/NonEmptyList.scala) 。。。）
 
 ### 2.21 Case classes SHOULD be final
 
-> 样例类应该标记为`final`
+> 样例类应该标记为 `final`
 
-Extending a case class will lead to unexpected behaviour. Observe the following:
+扩展样例类会导致意想不到的行为。请注意以下几点：
 ```scala
 scala> case class Foo(v:Int)
 defined class Foo
@@ -688,32 +638,29 @@ Foo(1) // ???
 scala> new Bar(1,2).copy()
 res49: Foo = Foo(1) // ???
 ```
-Credits:[Why case classes should be final](https://stackoverflow.com/a/34562046/3856808)
 
-So by default case classes should always be defined as final. 
+[为什么样例类应该是 final](https://stackoverflow.com/a/34562046/3856808)
 
-Example:
+因此，默认情况下，样例类应始终定义为 `final`。 
 
+示例：
 ```scala
 final case class User(name: String, id: Long)
 ```
 
 ### 2.22 SHOULD NOT use `scala.App`
 
-> 不应该使用`scala.App`
+> 不应该使用 `scala.App`
 
-`scala.App` is often used to denote the entrypoint of the application:
-
+`scala.App` 通常用来表示应用程序的入口点：
 ```scala
 object HelloWorldApp extends App {
   println("hello, world!")
 }
 ```
 
-`DelayedInit` one of the mechanisms used to implement `scala.App` [has been deprecated](https://github.com/scala/scala/pull/3563).
-Any variables defined in the object body will be available as fields, unless the `private` access modifier is applied.
-Prefer the simpler alternative of defining a main method:
-
+用于实现 `scala.App` 的机制之一 `DelayedInit` [已被弃用](https://github.com/scala/scala/pull/3563)。
+除非使用了 `private` 访问修饰符，否则对象主体中定义的任何变量都将作为字段可用。更简单的方法是定义一个 `main` 方法：
 ```scala
 object HelloWorldApp {
   def main(args: Array[String]): Unit = println("hello, world!")
