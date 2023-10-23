@@ -4,29 +4,17 @@
 
 ### 3.1. SHOULD NOT use the Cake Pattern
 
-The Cake Pattern is a very
-[good idea in theory](https://www.youtube.com/watch?v=yLbdw06tKPQ) -
-using traits as modules that can be composed, giving you the ability
-to override `import`, with compile-time dependency injection as a
-side-effect.
+> 不应该使用 Cake Pattern
 
-In practice all the Cake implementations I've seen have been awful,
-new projects should steer away and existing projects should be
-migrated off Cake.
+[从理论上讲](https://www.youtube.com/watch?v=yLbdw06tKPQ)，Cake 模式是一个非常好的想法 —— 使用特质作为可以组合的模块，让你能够覆盖 `import`，而编译时依赖项注入是一个副作用。
 
-People are not implementing Cake correctly, being a poorly understood
-design pattern. I haven't seen Cake implementations in which the
-traits are designed to be abstract modules, or that pay proper
-attention to life-cycle issues. What happens in practice is sloppiness,
-with the result being a big hairball. It's awesome that Scala allows
-you to do things like the Cake pattern, highlighting the real power of
-OOP, but just because you can doesn't mean you should, because if the
-purpose is doing dependency injection and decoupling between various
-components, you'll fail hard and impose that maintenance burden on
-your colleagues.
+实际上，我所见过的所有 Cake 实现都非常糟糕，新项目应该远离 Cake，现有项目也应该从 Cake 上迁移。
 
-For example, this is a common occurrence in Cake:
+由于 Cake 是一种鲜为人知的设计模式，因此人们并没有正确地实现它。我还没见过把特质设计成抽象模块的 Cake 实现，也没见过对生命周期问题给予适当关注的 Cake 实现。
+在实践中出现的情况就是马虎了事，结果导致一团乱麻。
+Scala 允许你实现 Cake 模式这样的功能，这很了不起，凸显了 OOP 的真正威力，但这并不意味着你应该这样做，因为如果你的目的是在不同组件之间进行依赖注入和解耦，那么你将彻底失败，并将维护负担强加给你的同事。
 
+例如，这是 Cake 中常见的情况：
 ```scala
 trait SomeServiceComponent {
   type SomeService <: SomeServiceLike
@@ -48,39 +36,22 @@ trait SomeServiceComponentImpl extends SomeServiceComponent {
 }
 ```
 
-In the example above `someService` is effectively a
-[singleton](https://en.wikipedia.org/wiki/Singleton_pattern) and a genuine
-one, because it's probably missing *life-cycle management*. And if by reading
-this code your alarms weren't set off by a singleton missing life-cycle
-management, well, be acquainted with the ugly secret of most Cake
-implementations. And for those conscious few that are doing this correctly,
-they end up in JVM initialization hell.
+在上面的示例中，`someService` 实际上是一个真正的[单例](https://en.wikipedia.org/wiki/Singleton_pattern)，因为它可能缺少*生命周期管理*。
+如果读完这段代码后，你还没有被单例缺少生命周期管理所触动，那么请了解大多数 Cake 实现的丑陋秘密。对于那些有意识地正确执行此操作的少数人来说，他们最终会陷入 JVM 初始化地狱。
 
-But that's not the only problem. The bigger problem is that developers are
-lazy, so you end up with huge components having dozens of dependencies
-and responsibilities, because Cake encourages this. And after the original
-developers that did this damage move from the project, you end up with
-other, smaller components, that duplicate the functionality of the original
-components, just because the original components are hell-like to test because
-you have to mock or stub too many things (another code smell). And you've got
-this forever repeating cycle, with developers ending up hating the code base,
-doing the minimal amount of work required to accomplish their tasks, ending
-up with other big, ugly and fundamentally flawed components. And because of
-the tight coupling that Cake naturally induces, they won't be easy to refactor.
+但这并不是唯一的问题。更大的问题是，开发人员都很懒惰，所以你最终得到的是有很多依赖关系和责任的大型组件，因为 Cake 鼓励这样做。
+在造成这种破坏的原始开发人员离开项目之后，你最终会得到其他更小的组件，这些组件复制了原始组件的功能，只是因为原始组件非常难以测试，因为你必须模拟或存根太多东西（另一种 *代码气味*）。
+这样你就陷入了一个永远重复的循环，开发人员最终讨厌代码库，只做了完成任务所需的最少的工作，最终得到了其他庞大、丑陋且从根本上有缺陷的组件。
+而且由于 Cake 自然导致的紧密耦合，它们不容易重构。
 
-So why do the above when something like this is much more readable
-and common sense:
-
+那么，当这样的东西更容易阅读和也更符合常识时，为什么要像上面那样做呢：
 ```scala
 class SomeService(dbService: DBService) {
   def query = dbService.query
 }
 ```
 
-Or if you really need abstract stuff (but please read
-[rule 2.4](2-language-rules.md#24-should-not-define-useless-traits)
-on not defining useless traits):
-
+或者，如果你真的需要抽象的东西（但请阅读第 [2.4 条](2-language-rules.md#24-should-not-define-useless-traits) 关于不定义无用特质的规定）：
 ```scala
 trait SomeService {
   def query: Rows
@@ -98,33 +69,21 @@ object SomeService {
 }
 ```
 
-Are your dependencies going crazy? Are those constructors starting
-to hurt? That's a feature. It is called "*pain driven development*"
-(PDD for short :-)). It's a sign that the architecture is not OK
-and the various dependency injection libraries or the Cake pattern
-are not fixing the problem, but the symptoms, by hiding the junk under
-the rug.
+你的依赖关系是否变得疯狂？那些构造函数是不是开始疼了？这是一个特点。
+它被称为 “*痛苦驱动开发*”（简称 PDD :-)）。这表明架构出现了问题，而各种依赖注入库或 Cake 模式并不是在解决问题，而是通过将垃圾隐藏在地毯下面来解决症状。
 
-So prefer plain old and reliable *constructor arguments*. And if you do
-need to use dependency injection libraries, then do it at the edges
-(like in Play's controllers). Because if a component depends on too many
-things, that's *code smell*. If a component depends on hard to initialize
-arguments, that's *code smell*. If you need to mock or stub interfaces in your
-tests just to test the pure business logic, that's probably *code smell* ;-)
+所以，还是使用简单可靠的 *构造函数参数* 吧。如果你确实需要使用依赖注入库，那就在边缘使用（比如 Play 的控制器）。因为如果一个组件依赖太多东西，就会产生 *代码气味*。
+如果一个组件依赖于难以初始化的参数，那就是 *代码气味*。如果为了测试纯粹的业务逻辑而需要在测试中模拟或存根接口，这很可能就是 *代码气味*；-)
 
-Don't hide painful things under the rug, fix it instead.
+不要把痛苦的事情藏在地毯下，而是要解决它。
 
 ### 3.2. MUST NOT put things in Play's Global
 
-I'm seeing this over and over again.
+这种情况我见了一次又一次。
 
-Folks,
-[Play's Global](https://www.playframework.com/documentation/2.3.x/ScalaGlobal)
-object is not a bucket in which you can shove your orphaned pieces of
-code. Its purpose is to hook into Play's configuration and life-cycle,
-nothing more.
+各位，Play 的 [Global](https://www.playframework.com/documentation/2.3.x/ScalaGlobal) 并不是一个可以把你的零散代码塞进去的桶。它的目的是与 Play 的配置和生命周期挂钩，仅此而已。
 
-Come up with your own freaking namespace for your utilities.
+为你的实用程序创建一个自己的独立命名空间。
 
 ### 3.3. SHOULD NOT apply optimizations without profiling
 
