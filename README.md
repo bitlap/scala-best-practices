@@ -54,8 +54,8 @@
 - [3. 应用架构](sections/3-architecture.md)
   - [3.1. ❎ 不应该使用 Cake pattern](sections/3-architecture.md#31-should-not-use-the-cake-pattern)
   - [3.2. 👎 禁止将内容放入 Play 的 Global](sections/3-architecture.md#32-must-not-put-things-in-plays-global)
-  - [3.3. ❎ 不应该应用优化而不进行分析](sections/3-architecture.md#33-should-not-apply-optimizations-without-profiling)
-  - [3.4. ✅ 应该注意垃圾收集器](sections/3-architecture.md#34-should-be-mindful-of-the-garbage-collector)
+  - [3.3. ❎ 没有经过分析不应该优化](sections/3-architecture.md#33-should-not-apply-optimizations-without-profiling)
+  - [3.4. ✅ 应当注意垃圾收集器](sections/3-architecture.md#34-should-be-mindful-of-the-garbage-collector)
   - [3.5. 👎 禁止使用无参数 `ConfigFactory.load()` 或直接访问 `Config` 对象](sections/3-architecture.md#35-must-not-use-parameterless-configfactoryload-or-access-a-config-object-directly)
 
 - [4. 并发和并行](sections/4-concurrency-parallelism.md)

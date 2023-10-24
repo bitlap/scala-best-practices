@@ -4,7 +4,7 @@
 
 ### 2.1. MUST NOT use "return"
 
-> 不要使用 `return`
+> 禁止使用 `return`
 
 Java 的 `return` 语句会产生副作用，即释放堆栈并将此值交给调用者。在一种强调全副作用的编程语言中，这样做是合理的。然而，Scala 是一种面向表达式的语言，其重点在于控制/限制副作用，因此 `return` 语句并不习惯。
 
@@ -154,7 +154,7 @@ object AssetsObservable {
 
 ### 2.5. MUST NOT use "var" inside a case class
 
-> 不要在样例类中使用 `var`
+> 禁止在样例类中使用 `var`
 
 样例类是定义类的语法糖，其中所有构造函数参数都是公共的和不可变的，因此是值标识的一部分，具有结构相等性、相应的 `hashCode` 实现以及编译器提供的自动生成的 `apply/unapply` 函数。
 
@@ -195,7 +195,7 @@ class Bar(val value: String) extends Foo
 
 ### 2.7. MUST NOT throw exceptions for validations of user input or flow control
 
-> 不要在验证用户输入或流控制时抛出异常
+> 禁止在验证用户输入或流控制时抛出异常
 
 理由有二:
 1. 它违背了结构化程序设计的原则，因为一个例程最终会有多个退出点，因此更难推理 —— 堆栈展开的发生是一个可怕的、通常不可预测的副作用。
@@ -207,7 +207,7 @@ class Bar(val value: String) extends Foo
 
 ### 2.8. MUST NOT catch Throwable when catching Exceptions
 
-> 捕获 `Exception` 时，不要捕获 `Throwable`
+> 捕获 `Exception` 时，禁止捕获 `Throwable`
 
 永远、永远、永远不要这样做：
 
@@ -238,7 +238,7 @@ try {
 
 ### 2.9. MUST NOT use "null"
 
-> 不要使用 `null`
+> 禁止使用 `null`
 
 必须避免使用 `null`。请使用 Scala 的 `Option[T]`。空值很容易出错，因为编译器无法保护你。函数定义中出现的可空值不会在这些定义中记录。因此要避免这样做：
 ```scala
@@ -291,7 +291,7 @@ list.flatMap(x => Some(x).filter(_ % 2 == 0))
 
 ### 2.10. MUST NOT use `Option.get`
 
-> 不要使用 `Option.get`
+> 禁止使用 `Option.get`
 
 你可能会想这样做：
 
@@ -318,7 +318,7 @@ val result = someValue.map(_ + 1)
 
 ### 2.11. MUST NOT use Java's Date or Calendar, instead use `java.time` (JSR-310)
 
-> 不要使用 Java 的日期或日历，而是使用 `java.time` （JSR-310）
+> 禁止使用 Java 的日期或日历，而是使用 `java.time` （JSR-310）
 
 Java 标准库中的日期和日历类非常糟糕，因为：
 1. 结果对象是可变的，这对于表达日期没有意义，日期应该是一个值（如果你必须在有字符串的地方使用 `StringBuffer`，你会有什么感觉？）
@@ -379,7 +379,7 @@ Unix 时间戳，前提是我们讨论的是自 `1970-01-01 00:00:00 UTC`（强�
 
 ### 2.14. MUST NOT use magic values
 
-> 不要使用魔法值
+> 禁止使用魔法值
 
 虽然在其他语言中使用 “魔法”（特殊）值（如值 `-1`）来表示特定结果并不罕见，但在 Scala 中有一系列的类型使用程序意图更明确。
 `Option`、`Either`、`Try` 就是这样的例子。此外，如果你想表达的不仅仅是布尔值的 `true` 或 `false`，你总能想出一个代数数据类型。
@@ -468,7 +468,7 @@ def sayHelloRunnable(name: String) = new Runnable {
 
 ### 2.18 MUST NOT include classes, traits and objects inside package objects
 
-> 不要在包对象中包含类、特质和对象
+> 禁止在包对象中包含类、特质和对象
 
 类（包括情况类）、特质和对象都不属于包对象内部。这是不必要的，它会混淆编译器，因此不鼓励使用。例如：
 ```scala
@@ -567,7 +567,7 @@ recursiveSumSeq(numbers, 0)
 
 ### 2.20 MUST NOT use `Seq.head`
 
-> 使用 `Seq.head`
+> 禁止使用 `Seq.head`
 
 你可能会有这种想法：
 

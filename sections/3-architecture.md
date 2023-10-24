@@ -39,10 +39,10 @@ trait SomeServiceComponentImpl extends SomeServiceComponent {
 在上面的示例中，`someService` 实际上是一个真正的[单例](https://en.wikipedia.org/wiki/Singleton_pattern)，因为它可能缺少*生命周期管理*。
 如果读完这段代码后，你还没有被单例缺少生命周期管理所触动，那么请了解大多数 Cake 实现的丑陋秘密。对于那些有意识地正确执行此操作的少数人来说，他们最终会陷入 JVM 初始化地狱。
 
-但这并不是唯一的问题。更大的问题是，开发人员都很懒惰，所以你最终得到的是有很多依赖关系和责任的大型组件，因为 Cake 鼓励这样做。
+但这并不是唯一的问题。更大的问题是，开发人员都很懒惰，所以你最终得到的是有很多依赖关系和职责的大型组件，因为 Cake 鼓励这样做。
 在造成这种破坏的原始开发人员离开项目之后，你最终会得到其他更小的组件，这些组件复制了原始组件的功能，只是因为原始组件非常难以测试，因为你必须模拟或存根太多东西（另一种 *代码气味*）。
-这样你就陷入了一个永远重复的循环，开发人员最终讨厌代码库，只做了完成任务所需的最少的工作，最终得到了其他庞大、丑陋且从根本上有缺陷的组件。
-而且由于 Cake 自然导致的紧密耦合，它们不容易重构。
+这样你就陷入了一个永远重复的循环，开发人员最终讨厌代码库，只做了完成任务所需的最少的工作，最终得到了庞大、丑陋且从根本上有缺陷的其他组件。
+而且由于 Cake 天生导致的紧密耦合，它们并不容易被重构。
 
 那么，当这样的东西更容易阅读和也更符合常识时，为什么要像上面那样做呢：
 ```scala
@@ -79,6 +79,8 @@ object SomeService {
 
 ### 3.2. MUST NOT put things in Play's Global
 
+> 禁止将内容放入 Play 的 Global
+
 这种情况我见了一次又一次。
 
 各位，Play 的 [Global](https://www.playframework.com/documentation/2.3.x/ScalaGlobal) 并不是一个可以把你的零散代码塞进去的桶。它的目的是与 Play 的配置和生命周期挂钩，仅此而已。
@@ -87,63 +89,40 @@ object SomeService {
 
 ### 3.3. SHOULD NOT apply optimizations without profiling
 
-Profiling is a prerequisite for doing optimizations. Never work on
-optimizations, unless through profiling you discover the actual
-bottlenecks.
+> 没有经过分析不应该优化
 
-This is because our intuition about how the system behaves often fails
-us and multiple effects could happen by applying optimizations without
-having hard numbers:
+分析是进行优化的先决条件。从不优化，除非通过分析发现瓶颈。
 
-- you could complicate the code or the architecture, thus making it
-  harder to apply later optimizations globally
-- your work could be in vain or it could actually lead to more
-  performance degradation
+这是因为我们对系统行为方式的直觉经常会失灵，而且，在没有确凿数据的情况下进行优化，可能会产生多种影响：
+- 可能会使代码或架构复杂化，从而更难在全局范围内应用后续优化
+- 你的工作可能会白费，或者实际上会导致更多的性能下降
 
-Multiple strategies available and you should preferably do all of
-them:
+有多种策略可供选择，你最好全部采用策略：
+- 一个好的探查器可以告诉你一些不明显的瓶颈，我最喜欢的是YourKit探查器，但Oracle的VisualVM是免费的，通常也足够好了。
+- 从运行中的生产系统中收集度量指标，通过 [Dropwizard Metrics](https://dropwizard.github.io/metrics/3.1.0/) 等库，并将其推送到 [Graphite](http://graphite.wikidot.com/) 之类的软件中，这种策略可引导你朝着正确的方向前进
+- 通过编写基准代码来比较解决方案。但要注意的是，基准测试并不容易，你至少应该使用一个库，诸如 [JMH](http://openjdk.java.net/projects/code-tools/jmh/)、[Scala Meter](https://scalameter.github.io/)
 
-- a good profiler can tell you about bottlenecks that aren't obvious,
-  my favorite being YourKit Profiler, but Oracle's VisualVM is free
-  and often good enough
-- collect metrics from the running production systems, by means of a
-  library such as
-  [Dropwizard Metrics](https://dropwizard.github.io/metrics/3.1.0/)
-  and push them in something like
-  [Graphite](http://graphite.wikidot.com/), a strategy that can lead
-  you in the right direction
-- compare solutions by writing benchmarking code, but note that
-  benchmarking is not easy and you should at least use a library like
-  [JMH](http://openjdk.java.net/projects/code-tools/jmh/), [Scala Meter](https://scalameter.github.io/)
-
-Overall - measure, don't guess.
+总的来说 - 要测量，不要猜测。
 
 ### 3.4. SHOULD be mindful of the garbage collector
 
-Don't over allocate resources, unless you need to. We want to avoid
-micro optimizations, but always be mindful about the effects
-allocations can have on your system.
+> 应注意垃圾回收器
 
-In the
-[words of Martin Thomson](http://www.infoq.com/presentations/top-10-performance-myths),
-if you stress the garbage collector, you'll increase the latency on
-stop-the-world freezes and the number of such occurrences, with the
-garbage collector acting like a GIL and thus limiting performance and
-vertical scalability.
+除非有必要，否则不要过度分配资源。我们希望避免微优化，但始终要注意分配资源对系统的影响。
 
-Example:
+用 [马丁-汤姆森（Martin Thomson）](http://www.infoq.com/presentations/top-10-performance-myths) 的话说：
+如果给垃圾收集器施加压力，就会增加 “stop-the-world” 冻结的延迟时间和发生次数，垃圾收集器就会像 GIL 一样发挥作用，从而限制性能和纵向可扩展性。
+
+示例：
 
 ```scala
 query.filter(_.someField.inSet(Set(name)))
 ```
 
-This is a sample that occurred in our project due to a problem with
-Slick's API. So instead of a `===` test, the developer chose to do an
-`inSet` operation with a sequence of 1 element. This allocation of a
-collection of 1 element happens on every method call. Now that's not
-good, what can be avoided should be avoided.
+这是我们项目中出现的一个示例，原因是 Slick 的 API 存在问题。因此，开发人员没有进行 `===` 测试，而是选择了对一个元素序列进行 `inSet` 操作。
+这种分配 1 个元素的集合会在每次方法调用时发生。这可不好，能避免的就应该避免。
 
-Another example:
+另一个例子：
 
 ```scala
 someCollection
@@ -151,11 +130,7 @@ someCollection
  .map(_.name)
 ```
 
-First of all, this creates a Set every single time, on each element of
-our collection. Second of all, filter and map can be compressed in one
-operation, otherwise we end up with more garbage and more time spent
-building the final collection:
-
+首先，每次都会在我们集合的每个元素上创建一个 `Set` 集合。其次，`filter` 和 `map` 可以压缩在一起操作，否则我们最终会产生更多的垃圾，并花费更多的时间构建最终集合：
 ```scala
 val isIDValid = Set(a,b,c)
 
@@ -164,9 +139,7 @@ someCollection.collect {
 }
 ```
 
-A generic example that often pops up, exemplifying useless traversals
-and operators that could be compressed:
-
+一个经常出现的通用示例，举例说明了可以压缩的无用遍历和运算符：
 ```scala
 collection
   .filter(bySomething)
@@ -175,30 +148,20 @@ collection
   .headOption
 ```
 
-Also, take notice of your requirements and use the data-structure
-suitable for your use-case. You want to build a stack? That's a
-`List`. You want to index a list? That's a `Vector`. You want to
-append to the end of a list? That's again a `Vector`. You want to push
-to the front and pull from the back? That's a `Queue`. You have a set
-of things and want to check for membership? That's a `Set`. You have a
-list of things that you want to keep ordered? That's a
-`SortedSet`. This isn't rocket science, just computer science 101.
+此外，请注意你的需求，并使用适合你的使用情况的数据结构。
+你想建立一个栈？那就用 `List`。要为列表建立索引？那就是 `Vector`。
+要追加到列表的末尾？那也是一个 `Vector`。
+要 push 到前面并从后面 pull 出来？这是一个 `Queue`。
+你有一组事物，并想检查其成员资格？这是一个 `Set`。
+你有一个要保持有序的列表？那就是 `SortedSet`。
+这不是高深的科学，而只是计算机科学 101。
 
-We are not talking about extreme micro optimizations here, we aren't
-even talking about something that's Scala, or FP, or JVM specific
-here, but be mindful of what you're doing and try to not do
-unnecessary allocations, as it's much harder fixing it later.
+我们不是在讨论极端的微优化，我们甚至不是在讨论 Scala、FP 或 JVM 特有的东西。
+但请注意你正在做的事情，尽量不要做不必要的分配，因为日后修复起来要困难得多。
 
-BTW, there is an obvious solution for keeping expressiveness while
-doing filtering and mapping - lazy collections, which in Scala means
-[Stream](http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Stream)
-if you need memoization or
-[Iterable](http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html)
-if you don't need memoization.
+顺便说一下，有一个显而易见的解决方案可以在进行 `filter` 和 `map` 的同时保持表现力 —— 惰性集合，这在 Scala 中意味着，如果需要记忆化则指 [Stream](http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Stream)， 如果不需要记忆化则指 [Iterable](http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html)。
 
-Also, make sure to read the
-[Rule 3.3](#33-should-not-apply-optimizations-without-profiling) on
-profiling.
+此外，请务必阅读 [Rule 3.3](#33-should-not-apply-optimizations-without-profiling)。
 
 ### 3.5. MUST NOT use parameterless ConfigFactory.load() or access a Config object directly
 
