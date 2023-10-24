@@ -41,10 +41,10 @@ trait SomeServiceComponentImpl extends SomeServiceComponent {
 
 但这并不是唯一的问题。更大的问题是，开发人员都很懒惰，所以你最终得到的是有很多依赖关系和职责的大型组件，因为 Cake 鼓励这样做。
 在造成这种破坏的原始开发人员离开项目之后，你最终会得到其他更小的组件，这些组件复制了原始组件的功能，只是因为原始组件非常难以测试，因为你必须模拟或存根太多东西（另一种 *代码气味*）。
-这样你就陷入了一个永远重复的循环，开发人员最终讨厌代码库，只做了完成任务所需的最少的工作，最终得到了庞大、丑陋且从根本上有缺陷的其他组件。
+这样你就陷入了一个永远重复的循环，开发人员最终讨厌代码库，只做了完成任务所需的最少的工作，最终得到了庞大、丑陋且从根本上有缺陷的组件。
 而且由于 Cake 天生导致的紧密耦合，它们并不容易被重构。
 
-那么，当这样的东西更容易阅读和也更符合常识时，为什么要像上面那样做呢：
+那么，当这样的东西更容易阅读也更符合常识时，为什么还要像上面那样做呢：
 ```scala
 class SomeService(dbService: DBService) {
   def query = dbService.query
@@ -73,7 +73,7 @@ object SomeService {
 它被称为 “*痛苦驱动开发*”（简称 PDD :-)）。这表明架构出现了问题，而各种依赖注入库或 Cake 模式并不是在解决问题，而是通过将垃圾隐藏在地毯下面来解决症状。
 
 所以，还是使用简单可靠的 *构造函数参数* 吧。如果你确实需要使用依赖注入库，那就在边缘使用（比如 Play 的控制器）。因为如果一个组件依赖太多东西，就会产生 *代码气味*。
-如果一个组件依赖于难以初始化的参数，那就是 *代码气味*。如果为了测试纯粹的业务逻辑而需要在测试中模拟或存根接口，这很可能就是 *代码气味*；-)
+如果一个组件依赖于难以初始化的参数，那便是 *代码气味*。如果为了测试纯粹的业务逻辑而需要在测试中模拟或存根接口，这很可能便是 *代码气味*；-)
 
 不要把痛苦的事情藏在地毯下，而是要解决它。
 
@@ -91,13 +91,13 @@ object SomeService {
 
 > 没有经过分析不应该优化
 
-分析是进行优化的先决条件。从不优化，除非通过分析发现瓶颈。
+分析是进行优化的先决条件。除非通过分析发现瓶颈，否则从不优化。
 
 这是因为我们对系统行为方式的直觉经常会失灵，而且，在没有确凿数据的情况下进行优化，可能会产生多种影响：
 - 可能会使代码或架构复杂化，从而更难在全局范围内应用后续优化
 - 你的工作可能会白费，或者实际上会导致更多的性能下降
 
-有多种策略可供选择，你最好全部采用策略：
+有多种策略可供选择，你最好全部采用：
 - 一个好的探查器可以告诉你一些不明显的瓶颈，我最喜欢的是YourKit探查器，但Oracle的VisualVM是免费的，通常也足够好了。
 - 从运行中的生产系统中收集度量指标，通过 [Dropwizard Metrics](https://dropwizard.github.io/metrics/3.1.0/) 等库，并将其推送到 [Graphite](http://graphite.wikidot.com/) 之类的软件中，这种策略可引导你朝着正确的方向前进
 - 通过编写基准代码来比较解决方案。但要注意的是，基准测试并不容易，你至少应该使用一个库，诸如 [JMH](http://openjdk.java.net/projects/code-tools/jmh/)、[Scala Meter](https://scalameter.github.io/)
@@ -179,7 +179,7 @@ class MyComponent {
 ```
 
 处理它的一种方法是将 `Config` 实例本身传递给需要它的人，或将其中的所需值传递给需要它的人。
-这里描述的情况实际上是 [prefer dependency injection (DI) over Service Locator](http://stackoverflow.com/questions/1638919/how-to-explain-dependency-injection-to-a-5-year-old/1638961#1638961) 一种做法。
+这里描述的情况实际上是 [prefer dependency injection (DI) over Service Locator](http://stackoverflow.com/questions/1638919/how-to-explain-dependency-injection-to-a-5-year-old/1638961#1638961) 的一种做法。
 
 你可以调用 `ConfigFactory.load()`，但要从应用程序的根目录调用，例如在你的 `main()`（或类似的地方）中调用，这样你就不必硬编码配置的文件名。
 
