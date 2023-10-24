@@ -26,7 +26,7 @@
 
 ### 1.2. MUST NOT rely on a SBT or IDE plugin to do the formatting for you
 
-> 不要依靠 SBT 或 IDE 插件进行代码格式化 
+> 禁止依靠 SBT 或 IDE 插件进行代码格式化 
 
 集成开发环境和 SBT 插件可以提供很大的帮助，但如果你想使用它们来自动格式化你的代码，那就要小心了。
 
