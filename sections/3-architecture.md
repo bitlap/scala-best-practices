@@ -165,56 +165,34 @@ collection
 
 ### 3.5. MUST NOT use parameterless ConfigFactory.load() or access a Config object directly
 
-It may be very tempting to call the oh-so-available-and-parameterless
-`ConfigFactory.load()` method whenever you need to pull something from
-the configuration, but doing so will boomerang back at you, for
-instance when writing tests.
+> 禁止使用无参数的 `ConfigFactory.load()` 或直接访问 `Config` 对象
 
-If you have
-[`ConfigFactory.load()`](https://typesafehub.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html#load--)
-scattered all around your classes they are basically loading the
-default configuration when your code runs, which more often than not,
-is not what you really want to happen in a testing environment, where
-you need to have a modified configuration loaded (e.g., different
-timeouts, different implementations, different IPs, etc.).
+每当需要从配置中调用某些内容时，调用无参数可用的 `ConfigFactory.load()` 方法，但这样做会适得其反，例如在编写测试时。
 
-NEVER do this:
+如果你的类中到处都有 [`ConfigFactory.load()`](https://typesafehub.github.io/config/latest/api/com/typesafe/config/ConfigFactory.html#load--)，它们基本上就是在代码运行时加载默认配置，而在测试环境中，你需要加载修改过的配置（如不同的超时、不同的实现、不同的 IP 等），这往往不是你真正想要的。
 
+千万不要这么做：
 ```scala
 class MyComponent {
   private val ip = ConfigFactory.load().getString("myComponent.ip")
 }
 ```
 
-One way to go about dealing with it, is to pass the `Config` instance
-itself to whomever needs it, or have the needed values from it passed
-in. The situation described here is in fact a flavor of the
-[prefer dependency injection (DI) over Service Locator](http://stackoverflow.com/questions/1638919/how-to-explain-dependency-injection-to-a-5-year-old/1638961#1638961)
-practice.
+处理它的一种方法是将 `Config` 实例本身传递给需要它的人，或将其中的所需值传递给需要它的人。
+这里描述的情况实际上是 [prefer dependency injection (DI) over Service Locator](http://stackoverflow.com/questions/1638919/how-to-explain-dependency-injection-to-a-5-year-old/1638961#1638961) 一种做法。
 
-You can call `ConfigFactory.load()`, but from your application's root,
-say in your `main()` (or equivalent) so that you don't have to hardcode your
-configuration's filename.
+你可以调用 `ConfigFactory.load()`，但要从应用程序的根目录调用，例如在你的 `main()`（或类似的地方）中调用，这样你就不必硬编码配置的文件名。
 
-Another good practice is to have domain specific config classes,
-which are parsed from the general purpose, map-like, Config
-objects. The benefit of this approach is that specialized config
-classes faithfully represent your specific configuration needs, and
-once parsed, allow you to work against compiled classes in a more
-type-safe way (where "safer" means you do `config.ip`, instead of
-`config.getString("ip")`).
+另一种好的做法是建立特定领域的配置类、这些类是从通用的、类似于 map 的 `Config` 对象解析而来。这种方法的好处是，专门的配置类能忠实地代表你的特定配置需求，并且一旦解析完毕，就能以类型安全的方式处理编译后的类。（这里的 “更安全” 指的是使用 `config.ip` 而不是 `config.getString("ip")`）。
 
-This also has the benefit of clarity, as your domain specific config
-class conveys the needed properties in a more explicit and readable
-manner.
+这样做的另一个好处是代码更清晰，因为特定领域的配置类以更明确和可读的方式传达所需的属性。
 
-Consider the following example:
+请看下面的示例：
 
 ```scala
-/** This is your domain specific config class, with a pre-defined set of
-  * properties you've modeled according to your domain, as opposed to
-  * a map-like properties bag
-  */
+/** 
+ * 这是特定的领域配置类，具有一组预定义的属性，而不是类似map的属性包。
+ */
 case class AppConfig(
   myComponent: MyComponentConfig,
   httpClient: HttpClientConfig
@@ -273,18 +251,11 @@ class MyComponent(config: MyComponentConfig, httpClient: HttpClient) {
 }
 ```
 
-Benefits of this approach:
+这种方法的优点：
+- 配置对象只是不可变的样例类，可以很容易地实例化
+- 你的组件最终将依赖于只与它们相关的具体且类型安全的配置定义，而不是接收一个包含所有内容且实例化成本高昂的单一且不安全的 `Config`
+- 现在，你的集成开发环境可以在文档和可发现性方面提供帮助
+- 而你的编译器可以帮助解决拼写错误
 
-- the config objects are just immutable case classes of primitives that
-  can be easily instantiated
-- your components end up depending on concrete and type-safe configuration
-  definitions related only to them, instead of receiving a monolithic and
-  unsafe `Config` that contains everything and that's expensive to instantiate
-- and now your IDE can help with documentation and discoverability
-- and your compiler can help with spelling errors
-
-NOTE about style: these configuration case classes tend to get big and to contain
-primitives (e.g. ints, strings, etc.), so usage of named
-parameters makes the code more resistant to change and less error-prone,
-versus relying on positioning. The style of indentation chosen here makes
-the instantiation look like a `Map` or a JSON object if you want.
+关于样式的注意事项：这些配置样例类往往会变得很大，并且包含多种类型（如 `Int`、`String` 等），因此与依赖位置的相比，使用命名参数会使代码更不易更改，更不易出错。
+这里选择的缩进方式使实例化看起来像一个 `Map` 或 JSON 对象。

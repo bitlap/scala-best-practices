@@ -56,7 +56,7 @@
   - [3.2. 👎 禁止将内容放入 Play 的 Global](sections/3-architecture.md#32-must-not-put-things-in-plays-global)
   - [3.3. ❎ 没有经过分析不应该优化](sections/3-architecture.md#33-should-not-apply-optimizations-without-profiling)
   - [3.4. ✅ 应当注意垃圾收集器](sections/3-architecture.md#34-should-be-mindful-of-the-garbage-collector)
-  - [3.5. 👎 禁止使用无参数 `ConfigFactory.load()` 或直接访问 `Config` 对象](sections/3-architecture.md#35-must-not-use-parameterless-configfactoryload-or-access-a-config-object-directly)
+  - [3.5. 👎 禁止使用无参数的 `ConfigFactory.load()` 或直接访问 `Config` 对象](sections/3-architecture.md#35-must-not-use-parameterless-configfactoryload-or-access-a-config-object-directly)
 
 - [4. 并发和并行](sections/4-concurrency-parallelism.md)
   - [4.1. ✅ 应该视并发如瘟疫](sections/4-concurrency-parallelism.md#41-should-avoid-concurrency-like-the-plague-it-is)
