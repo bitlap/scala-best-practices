@@ -18,7 +18,7 @@ def action = Action { request =>
 }
 ```
 
-在 Scala 中，嵌套匿名函数内的 `return` 语句是通过抛出和捕获 `NonLocalReturnException` 来实现的。[Scala 语言规范](https://scala-lang.org/files/archive/spec/2.13/spec.pdf) 第 6.20 节是这么说的。
+在 Scala 中，嵌套匿名函数内的 `return` 语句是通过抛出和捕获 `NonLocalReturnControl[A]` 来实现的。[Scala 语言规范](https://scala-lang.org/files/archive/spec/2.13/spec.pdf) 第 6.20 节是这么说的。
 
 此外，`return` 是反结构编程，因为函数可以有多个退出点，如果你需要 `return`，比如在那些有大量 `if/else` 分支的巨大方法中，`return` 的存在是一个明确的信号，表明代码很糟糕，未来很容易引起BUG，因此急需重构。
 

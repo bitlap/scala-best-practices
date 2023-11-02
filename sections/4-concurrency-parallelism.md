@@ -4,78 +4,48 @@
 
 ### 4.1. SHOULD avoid concurrency like the plague it is
 
-Avoid having to deal with concurrency as much as possible. People good
-at concurrency avoid it like the plague it is.
+> 应该视并发如瘟疫
 
-**WARNING:** concurrency issues happen not only when speaking about
-shared memory and threads, but also between processes when contention
-on any kind of resource (like a database) is involved.
+尽可能避免处理并发问题。善于处理并发问题的人会像躲避瘟疫一样躲避并发问题。
 
-Example - when a job is scheduled to execute every minute by using
-cron.d in Linux and that job fetches and updates items from a queue
-persisted in MySQL, that job can take longer than 1 minute to execute
-and thus you can end up with 2 or 3 processes executing at the same
-time and contending on the same MySQL table.
+**警告：** 并发问题不仅会在讨论共享内存和线程时出现，而且在涉及任何类型的资源（如数据库）的争用时，进程之间也会发生。
+
+例如，在 Linux 中使用 cron.d 计划每分钟执行一次作业，而该作业从 MySQL（表）中获取和更新项目时，该作业的执行时间可能会超过 1 分钟。
+因此，你可能会看到 2 或 3 个进程同时执行，并在同一个 MySQL 表上竞争。
 
 ### 4.2. SHOULD use appropriate abstractions only where suitable - Future, Actors, Rx
 
-Learn about the abstractions available and choose between them
-depending on the task at hand. There is no silver bullet that can be
-generally applied. The more high-level the abstraction, the less scope
-it has in solving issues. But the less scope and power it has, the simpler
-and more composable the model is. For example many developers in the Scala
-community are overusing Akka Actors - which are great, but not when
-misapplied. Like don't use an Akka Actor when a `Future` would do.
+> 应该只在适当的情况下使用适当的抽象
 
-> "*Power tends to corrupt, and absolute power corrupts absolutely*" -- Lord Acton
+了解可用的抽象概念，并根据手头的任务在它们之间做出选择，总之，视手头的任务而定。
+没有什么灵丹妙药可以普遍适用。抽象程度越高，其解决问题的范围就越小。但是，范围越小、功能越强，模型就越简单、可组合。
+例如，Scala 社区中的许多开发人员都在过度使用 Akka Actors，这固然很好，但如果使用不当就会造成问题。
+比如，在使用 `Future` 时，不要使用 Akka Actor。
 
-Scala's Futures and Promises are good because:
+> "*权力会导致腐败，绝对的权力会导致绝对的腐败*" -- Lord Acton
 
-- they are inherently parallelizable by eliminating concurrency
-  concerns
-- fairly efficient, because when submitting a task to the implicit
-  `ExecutionContext`, this execution context efficiently multiplexes
-  between few threads by default (the number of threads in the
-  thread-pool is often directly proportional to the number of CPU cores
-  you have)
-- alternative implementations can be even more simpler and efficient 
-  than Scala's standard Future, because the standard Future was designed
-  to be general purpose
-- the model is inherently simple and easy to use
+Scala 的 Futures 和 Promises 之所以好，是因为：
+- 由于消除了并发性问题，它们本质上是可并行的
+- 相当高效，默认情况下，因为将任务提交给隐式的 `ExecutionContext`时，该执行上下文可以在少数线程之间有效地进行多路复用（线程池中的线程数通常与 CPU 内核数成正比）
+  成正比）
+- 其他实现可能比 Scala 的标准 Future 更简单、更高效，因为标准 Future 的设计初衷是通用的
+- 模型本身简单易用
 
-Futures and Promises are bad because they signal only one value from
-the producer to the consumer and that's it - if you need a stream or
-bi-directional communications, a Future might not be the best
-abstraction.
+Futures 和 Promises 之所以糟糕，是因为它们只向生产者和消费者传递一种 value（值） 信号，仅此而已。
+如果你需要流或双向通信，Future 可能不是最好的抽象。
 
-Akka Actors are good because:
+Akka Actors 的优点在于：
+- 它们使异步边界上的双向通信变得简单 —— 例如，对于 WebSocket，Actors 便是最佳选择之一
+- 使用 Akka 的 Actors，你可以轻松地为状态机建模（参见  `context.become`)
+- 消息的处理有很强的非并发性保证 —— 消息是逐个处理的，因此在一个 actor 的上下文中无需担心并发问题
+- 你可以直接使用 actor，而不是在内存中实现一个半吊子的队列来处理事情，因为它们的工作就是对消息进行排队并采取行动
 
-- they make bidirectional communications over asynchronous boundaries
-  easy - for example WebSocket is a prime candidate for actors
-- with Akka's Actors you can easily model state machines (see
-  `context.become`)
-- the processing of messages has a strong guarantee of
-  non-concurrency - messages are processed one by one, so there's no
-  need to worry about concurrency issues while in the context of an
-  actor
-- instead of implementing a half-assed in-memory queue for processing
-  of things, you could just use an actor, since queuing of messages and
-  acting on those messages is what they do
-
-Akka's Actors are bad because:
-
-- they are fairly low-level for many tasks
-- it's extremely easy to model actors that keep a lot of state, ending
-  up with a system that can't be horizontally scaled
-- because of the bidirectional communications capability, it's
-  extremely easy to end up with data flows that are so complex as to be
-  unmanageable
-- the model in general is actor A sending a message to actor B - but
-  if you need to model a stream of events, this tight coupling between A
-  and B is not acceptable
-- actors, as used in practice with Akka, tend to be inducing uncontrolled 
-  side effects and that's error prone, the opposite of functional programming
-  and not idiomatic Scala
+Akka 的 Actors 很糟糕，因为：
+- 对于许多任务来说，它们的级别都相当低
+- 为保持大量状态的 actor 建模是非常容易的，最终得到的是一个无法横向扩展的系统
+- 由于具有双向通信能力，数据流极易复杂到无法管理的地步
+- 一般情况下，模型是 actor A 向 actor B 发送信息，但如果需要对事件流进行建模，A 和 B 之间的这种紧密耦合是不可接受的
+- 在 Akka 的实际应用中，actor 往往会诱发不受控制的副作用，这不仅很容易出错，且与函数式编程相违背，它也不是 Scala 的习惯做法
 
 Streaming abstractions such as [Play's Iteratees](https://www.playframework.com/documentation/2.5.x/Iteratees) / 
 [Akka Streams](http://doc.akka.io/docs/akka-stream-and-http-experimental/2.0-M2/scala.html) /
